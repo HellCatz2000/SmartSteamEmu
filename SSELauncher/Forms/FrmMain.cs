@@ -177,11 +177,6 @@ namespace SSELauncher
         {
             if (m.Msg == NativeMethods.WM_SHOWME)
             {
-                if (WindowState == FormWindowState.Minimized)
-                {
-                    WindowState = LastWindowState;
-                }
-
                 Visible = true;
                 WindowState = LastWindowState;
                 Activate();
@@ -1754,7 +1749,7 @@ namespace SSELauncher
             this.lstApps.Location = new System.Drawing.Point(0, 24);
             this.lstApps.Margin = new System.Windows.Forms.Padding(2);
             this.lstApps.Name = "lstApps";
-            this.lstApps.Size = new System.Drawing.Size(323, 388);
+            this.lstApps.Size = new System.Drawing.Size(323, 763);
             this.lstApps.SmallImageList = this.imgList;
             this.lstApps.TabIndex = 0;
             this.lstApps.UseCompatibleStateImageBehavior = false;
@@ -2156,13 +2151,14 @@ namespace SSELauncher
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(323, 414);
+            this.ClientSize = new System.Drawing.Size(323, 375);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.pbDrop);
             this.Controls.Add(this.lstApps);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.Margin = new System.Windows.Forms.Padding(2);
+            this.MinimumSize = new System.Drawing.Size(339, 414);
             this.Name = "FrmMain";
             this.Text = "SmartSteamEmu Comfy Launcher";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_Closing);
