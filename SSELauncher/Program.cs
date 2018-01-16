@@ -80,7 +80,7 @@ namespace SSELauncher
                 return;
             }
 
-            NativeMethods.PostMessage((IntPtr)65535, NativeMethods.WM_SHOWME, IntPtr.Zero, IntPtr.Zero);
+            NativeMethods.PostMessage((IntPtr)NativeMethods.HWND_BROADCAST, NativeMethods.WM_SHOWME, IntPtr.Zero, IntPtr.Zero);
         }
     }
 }

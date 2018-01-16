@@ -173,6 +173,23 @@ namespace SSELauncher
             expr_D1.RunWorkerAsync();
         }
 
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == NativeMethods.WM_SHOWME)
+            {
+                if (WindowState == FormWindowState.Minimized)
+                {
+                    WindowState = LastWindowState;
+                }
+
+                Visible = true;
+                WindowState = LastWindowState;
+                Activate();
+            }
+
+            base.WndProc(ref m);
+        }
+
         private void FrmMain_Load(object sender, EventArgs e)
         {
             editGameToolStripMenuItem.Enabled = false;
