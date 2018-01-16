@@ -22,6 +22,7 @@ namespace SSELauncher
 		private Label label3;
 
 		private Panel panel1;
+        private Label lblVisitComfySource;
         private Button btnClose;
 
 		public FrmAbout()
@@ -73,7 +74,12 @@ namespace SSELauncher
 			Process.Start("http://cs.rin.ru/forum/viewtopic.php?f=29&t=62935");
 		}
 
-		private void InitializeComponent()
+        private void lblVisitComfySource_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://gitgud.io/softashell/SSELauncher-comfy-edition");
+        }
+
+        private void InitializeComponent()
 		{
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -84,6 +90,7 @@ namespace SSELauncher
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnClose = new System.Windows.Forms.Button();
             this.pbLogo = new System.Windows.Forms.PictureBox();
+            this.lblVisitComfySource = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLogo)).BeginInit();
             this.SuspendLayout();
@@ -113,10 +120,10 @@ namespace SSELauncher
             // 
             this.lblVisit.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lblVisit.ForeColor = System.Drawing.SystemColors.HotTrack;
-            this.lblVisit.Location = new System.Drawing.Point(9, 153);
+            this.lblVisit.Location = new System.Drawing.Point(11, 153);
             this.lblVisit.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblVisit.Name = "lblVisit";
-            this.lblVisit.Size = new System.Drawing.Size(254, 19);
+            this.lblVisit.Size = new System.Drawing.Size(250, 19);
             this.lblVisit.TabIndex = 2;
             this.lblVisit.Text = "Project forum @ cs.rin.ru";
             this.lblVisit.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -187,12 +194,26 @@ namespace SSELauncher
             this.pbLogo.TabIndex = 0;
             this.pbLogo.TabStop = false;
             // 
+            // lblVisitComfySource
+            // 
+            this.lblVisitComfySource.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblVisitComfySource.ForeColor = System.Drawing.SystemColors.HotTrack;
+            this.lblVisitComfySource.Location = new System.Drawing.Point(11, 172);
+            this.lblVisitComfySource.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblVisitComfySource.Name = "lblVisitComfySource";
+            this.lblVisitComfySource.Size = new System.Drawing.Size(250, 19);
+            this.lblVisitComfySource.TabIndex = 4;
+            this.lblVisitComfySource.Text = "Comfy edition source @ gitgud.io";
+            this.lblVisitComfySource.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblVisitComfySource.Click += new System.EventHandler(this.lblVisitComfySource_Click);
+            // 
             // FrmAbout
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(272, 327);
             this.ControlBox = false;
+            this.Controls.Add(this.lblVisitComfySource);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.lblVisit);
             this.Controls.Add(this.label2);
@@ -215,5 +236,5 @@ namespace SSELauncher
             this.PerformLayout();
 
 		}
-	}
+    }
 }

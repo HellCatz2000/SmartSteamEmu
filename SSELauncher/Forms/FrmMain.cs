@@ -2150,7 +2150,7 @@ namespace SSELauncher
             this.MainMenuStrip = this.menuStrip;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "FrmMain";
-            this.Text = "SmartSteamEmu Launcher";
+            this.Text = "SmartSteamEmu Comfy Launcher";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_Closing);
             this.Load += new System.EventHandler(this.FrmMain_Load);
             this.Resize += new System.EventHandler(this.FrmMain_Resize);
