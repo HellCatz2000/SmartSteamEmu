@@ -615,30 +615,27 @@ namespace SSELauncher
                         }
                     }
                     sw.WriteLine("");
-                    string text6 = "";
+                    string broadcastAddress = "";
                     if (app.ListenPort == -1)
                     {
-                        using (List<string>.Enumerator enumerator = gconf.BroadcastAddress.GetEnumerator())
+                        foreach (var address in gconf.BroadcastAddress)
                         {
-                            while (enumerator.MoveNext())
-                            {
-                                string current4 = enumerator.Current;
-                                text6 = text6 + current4 + " ";
-                            }
-                            goto IL_9EB;
+                            broadcastAddress += address + " ";
                         }
                     }
-                    foreach (string current5 in app.BroadcastAddress)
+                    else
                     {
-                        text6 = text6 + current5 + " ";
+                        foreach (var address in app.BroadcastAddress)
+                        {
+                            broadcastAddress += address + " ";
+                        }
                     }
-                IL_9EB:
                     int num2 = (app.ListenPort == -1) ? gconf.ListenPort : app.ListenPort;
                     int num3 = (app.MaximumPort == -1) ? gconf.MaximumPort : app.MaximumPort;
                     int num4 = (app.DiscoveryInterval == -1) ? gconf.DiscoveryInterval : app.DiscoveryInterval;
                     int num5 = (app.MaximumConnection == -1) ? gconf.MaximumConnection : app.MaximumConnection;
                     sw.WriteLine("[Networking]");
-                    sw.WriteLine("BroadcastAddress = " + text6);
+                    sw.WriteLine("BroadcastAddress = " + broadcastAddress);
                     sw.WriteLine("ListenPort = " + num2);
                     sw.WriteLine("MaximumPort = " + num3);
                     sw.WriteLine("DiscoveryInterval = " + num4);
