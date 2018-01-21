@@ -154,6 +154,8 @@ namespace SSELauncher
 
         private NotifyIcon notifyIcon1;
         private ToolStripMenuItem openStorageLocationToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripMenuItem openSaveLocationToolStripMenuItem;
         private ToolStripMenuItem openFileLocationToolStripMenuItem;
 
         public FrmMain()
@@ -1667,6 +1669,27 @@ namespace SSELauncher
             Process.Start(Path.GetDirectoryName(m_AppList.GetApp(tag).Path));
         }
 
+        private string GetAppStoragePath(CApp app)
+        {
+            var path = String.Empty;
+
+            bool storageOnAppdata = (app.StorageOnAppdata == -1) ? Conf.StorageOnAppdata : Convert.ToBoolean(app.StorageOnAppdata);
+            bool separateStorageByName = (app.SeparateStorageByName == -1) ? Conf.SeparateStorageByName : Convert.ToBoolean(app.SeparateStorageByName);
+
+            var basePath = storageOnAppdata ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SmartSteamEmu");
+
+            path = Path.Combine(basePath, "SmartSteamEmu");
+
+            if (separateStorageByName)
+            {
+                path = Path.Combine(path, Conf.PersonaName);
+            }
+
+            path = Path.Combine(path, app.AppId.ToString());
+
+            return path;
+        }
+
         private void openStorageLocationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (lstApps.SelectedItems.Count == 0)
@@ -1677,21 +1700,7 @@ namespace SSELauncher
             var tag = lstApps.SelectedItems[0];
             var app = m_AppList.GetApp(tag);
 
-            bool storageOnAppdata = (app.StorageOnAppdata == -1) ? Conf.StorageOnAppdata : Convert.ToBoolean(app.StorageOnAppdata);
-            bool separateStorageByName = (app.SeparateStorageByName == -1) ? Conf.SeparateStorageByName : Convert.ToBoolean(app.SeparateStorageByName);
-
-            // TODO: Handle this
-            //string remoteStoragePath = (string.IsNullOrWhiteSpace(app.RemoteStoragePath) ? "" : app.RemoteStoragePath);
- 
-            var basePath = storageOnAppdata ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SmartSteamEmu");
-            var path = Path.Combine(basePath, "SmartSteamEmu");
-
-            if (separateStorageByName)
-            {
-                path = Path.Combine(path, Conf.PersonaName);
-            }
-
-            path = Path.Combine(path, app.AppId.ToString());
+            var path = GetAppStoragePath(app);
 
             if (Directory.Exists(path))
             {
@@ -1699,8 +1708,40 @@ namespace SSELauncher
             }
             else
             {
-                MessageBox.Show("Save location doesn't exist (yet), have you ever started this game before?", "Error");
+                MessageBox.Show("SSE storage location doesn't exist (yet), have you ever started this game before?", "Error");
             }
+        }
+
+        private void openSaveLocationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lstApps.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            var tag = lstApps.SelectedItems[0];
+            var app = m_AppList.GetApp(tag);
+
+            var path = String.Empty;
+
+            if (!string.IsNullOrWhiteSpace(app.RemoteStoragePath))
+            {
+                path = app.RemoteStoragePath;
+            }
+            else
+            {
+                path = Path.Combine(GetAppStoragePath(app), "remote");
+            }
+
+            if (Directory.Exists(path))
+            {
+                Process.Start(path);
+            }
+            else
+            {
+                MessageBox.Show("SSE save location doesn't exist (yet), have you ever started this game before?", "Error");
+            }
+
         }
 
         protected override void Dispose(bool disposing)
@@ -1770,6 +1811,8 @@ namespace SSELauncher
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pbDrop = new System.Windows.Forms.PictureBox();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.openSaveLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.ctxMenuStrip.SuspendLayout();
             this.ctxMenuViewStrip.SuspendLayout();
@@ -1836,45 +1879,45 @@ namespace SSELauncher
             // addGamesToolStripMenuItem
             // 
             this.addGamesToolStripMenuItem.Name = "addGamesToolStripMenuItem";
-            this.addGamesToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.addGamesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.addGamesToolStripMenuItem.Text = "&Add Game";
             this.addGamesToolStripMenuItem.Click += new System.EventHandler(this.addGamesToolStripMenuItem_Click);
             // 
             // editGameToolStripMenuItem
             // 
             this.editGameToolStripMenuItem.Name = "editGameToolStripMenuItem";
-            this.editGameToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.editGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.editGameToolStripMenuItem.Text = "&Edit Game";
             this.editGameToolStripMenuItem.Click += new System.EventHandler(this.editGameToolStripMenuItem_Click);
             // 
             // deleteGameToolStripMenuItem
             // 
             this.deleteGameToolStripMenuItem.Name = "deleteGameToolStripMenuItem";
-            this.deleteGameToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.deleteGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.deleteGameToolStripMenuItem.Text = "&Delete Game";
             this.deleteGameToolStripMenuItem.Click += new System.EventHandler(this.deleteGameToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(138, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(138, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -1900,15 +1943,17 @@ namespace SSELauncher
             this.launchToolStripMenuItem,
             this.launchNormallywithoutEmuToolStripMenuItem,
             this.createDesktopShortcutToolStripMenuItem,
+            this.toolStripSeparator1,
             this.openFileLocationToolStripMenuItem,
             this.openStorageLocationToolStripMenuItem,
+            this.openSaveLocationToolStripMenuItem,
             this.toolStripMenuItem3,
             this.deleteToolStripMenuItem,
             this.renameToolStripMenuItem,
             this.toolStripMenuItem7,
             this.editToolStripMenuItem});
             this.ctxMenuStrip.Name = "ctxMenuStrip";
-            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 192);
+            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 242);
             // 
             // launchToolStripMenuItem
             // 
@@ -2192,6 +2237,18 @@ namespace SSELauncher
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(241, 6);
+            // 
+            // openSaveLocationToolStripMenuItem
+            // 
+            this.openSaveLocationToolStripMenuItem.Name = "openSaveLocationToolStripMenuItem";
+            this.openSaveLocationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.openSaveLocationToolStripMenuItem.Text = "Open Save Location";
+            this.openSaveLocationToolStripMenuItem.Click += new System.EventHandler(this.openSaveLocationToolStripMenuItem_Click);
+            // 
             // FrmMain
             // 
             this.AllowDrop = true;
@@ -2219,6 +2276,5 @@ namespace SSELauncher
             this.PerformLayout();
 
         }
-
     }
 }
