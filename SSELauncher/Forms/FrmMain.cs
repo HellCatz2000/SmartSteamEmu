@@ -153,7 +153,7 @@ namespace SSELauncher
         private ToolStripMenuItem hideMissingShortcutToolStripMenuItem;
 
         private NotifyIcon notifyIcon1;
-
+        private ToolStripMenuItem openStorageLocationToolStripMenuItem;
         private ToolStripMenuItem openFileLocationToolStripMenuItem;
 
         public FrmMain()
@@ -1662,8 +1662,45 @@ namespace SSELauncher
             {
                 return;
             }
+
             ListViewItem tag = lstApps.SelectedItems[0];
             Process.Start(Path.GetDirectoryName(m_AppList.GetApp(tag).Path));
+        }
+
+        private void openStorageLocationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lstApps.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            var tag = lstApps.SelectedItems[0];
+            var app = m_AppList.GetApp(tag);
+
+            bool storageOnAppdata = (app.StorageOnAppdata == -1) ? Conf.StorageOnAppdata : Convert.ToBoolean(app.StorageOnAppdata);
+            bool separateStorageByName = (app.SeparateStorageByName == -1) ? Conf.SeparateStorageByName : Convert.ToBoolean(app.SeparateStorageByName);
+
+            // TODO: Handle this
+            //string remoteStoragePath = (string.IsNullOrWhiteSpace(app.RemoteStoragePath) ? "" : app.RemoteStoragePath);
+ 
+            var basePath = storageOnAppdata ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SmartSteamEmu");
+            var path = Path.Combine(basePath, "SmartSteamEmu");
+
+            if (separateStorageByName)
+            {
+                path = Path.Combine(path, Conf.PersonaName);
+            }
+
+            path = Path.Combine(path, app.AppId.ToString());
+
+            if (Directory.Exists(path))
+            {
+                Process.Start(path);
+            }
+            else
+            {
+                MessageBox.Show("Save location doesn't exist (yet), have you ever started this game before?", "Error");
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -1697,6 +1734,7 @@ namespace SSELauncher
             this.launchNormallywithoutEmuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createDesktopShortcutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openStorageLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1863,13 +1901,14 @@ namespace SSELauncher
             this.launchNormallywithoutEmuToolStripMenuItem,
             this.createDesktopShortcutToolStripMenuItem,
             this.openFileLocationToolStripMenuItem,
+            this.openStorageLocationToolStripMenuItem,
             this.toolStripMenuItem3,
             this.deleteToolStripMenuItem,
             this.renameToolStripMenuItem,
             this.toolStripMenuItem7,
             this.editToolStripMenuItem});
             this.ctxMenuStrip.Name = "ctxMenuStrip";
-            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 170);
+            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 192);
             // 
             // launchToolStripMenuItem
             // 
@@ -1898,6 +1937,13 @@ namespace SSELauncher
             this.openFileLocationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.openFileLocationToolStripMenuItem.Text = "&Open File Location";
             this.openFileLocationToolStripMenuItem.Click += new System.EventHandler(this.openFileLocationToolStripMenuItem_Click);
+            // 
+            // openStorageLocationToolStripMenuItem
+            // 
+            this.openStorageLocationToolStripMenuItem.Name = "openStorageLocationToolStripMenuItem";
+            this.openStorageLocationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.openStorageLocationToolStripMenuItem.Text = "Open Storage Location";
+            this.openStorageLocationToolStripMenuItem.Click += new System.EventHandler(this.openStorageLocationToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -2173,5 +2219,6 @@ namespace SSELauncher
             this.PerformLayout();
 
         }
+
     }
 }
