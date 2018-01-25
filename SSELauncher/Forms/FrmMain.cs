@@ -1774,8 +1774,10 @@ namespace SSELauncher
             this.launchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.launchNormallywithoutEmuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createDesktopShortcutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.openFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openStorageLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openSaveLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1811,8 +1813,6 @@ namespace SSELauncher
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pbDrop = new System.Windows.Forms.PictureBox();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.openSaveLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.ctxMenuStrip.SuspendLayout();
             this.ctxMenuViewStrip.SuspendLayout();
@@ -1821,16 +1821,14 @@ namespace SSELauncher
             // 
             // lstApps
             // 
-            this.lstApps.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.lstApps.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstApps.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstApps.LabelEdit = true;
             this.lstApps.LargeImageList = this.imgList;
-            this.lstApps.Location = new System.Drawing.Point(0, 24);
+            this.lstApps.Location = new System.Drawing.Point(0, 0);
             this.lstApps.Margin = new System.Windows.Forms.Padding(2);
             this.lstApps.Name = "lstApps";
-            this.lstApps.Size = new System.Drawing.Size(323, 763);
+            this.lstApps.Size = new System.Drawing.Size(323, 375);
             this.lstApps.SmallImageList = this.imgList;
             this.lstApps.TabIndex = 0;
             this.lstApps.UseCompatibleStateImageBehavior = false;
@@ -1879,45 +1877,45 @@ namespace SSELauncher
             // addGamesToolStripMenuItem
             // 
             this.addGamesToolStripMenuItem.Name = "addGamesToolStripMenuItem";
-            this.addGamesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.addGamesToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.addGamesToolStripMenuItem.Text = "&Add Game";
             this.addGamesToolStripMenuItem.Click += new System.EventHandler(this.addGamesToolStripMenuItem_Click);
             // 
             // editGameToolStripMenuItem
             // 
             this.editGameToolStripMenuItem.Name = "editGameToolStripMenuItem";
-            this.editGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editGameToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.editGameToolStripMenuItem.Text = "&Edit Game";
             this.editGameToolStripMenuItem.Click += new System.EventHandler(this.editGameToolStripMenuItem_Click);
             // 
             // deleteGameToolStripMenuItem
             // 
             this.deleteGameToolStripMenuItem.Name = "deleteGameToolStripMenuItem";
-            this.deleteGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.deleteGameToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.deleteGameToolStripMenuItem.Text = "&Delete Game";
             this.deleteGameToolStripMenuItem.Click += new System.EventHandler(this.deleteGameToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(138, 6);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(138, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -1953,7 +1951,7 @@ namespace SSELauncher
             this.toolStripMenuItem7,
             this.editToolStripMenuItem});
             this.ctxMenuStrip.Name = "ctxMenuStrip";
-            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 242);
+            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 220);
             // 
             // launchToolStripMenuItem
             // 
@@ -1976,6 +1974,11 @@ namespace SSELauncher
             this.createDesktopShortcutToolStripMenuItem.Text = "&Create Desktop Shortcut";
             this.createDesktopShortcutToolStripMenuItem.Click += new System.EventHandler(this.createDesktopShortcutToolStripMenuItem_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(241, 6);
+            // 
             // openFileLocationToolStripMenuItem
             // 
             this.openFileLocationToolStripMenuItem.Name = "openFileLocationToolStripMenuItem";
@@ -1989,6 +1992,13 @@ namespace SSELauncher
             this.openStorageLocationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.openStorageLocationToolStripMenuItem.Text = "Open Storage Location";
             this.openStorageLocationToolStripMenuItem.Click += new System.EventHandler(this.openStorageLocationToolStripMenuItem_Click);
+            // 
+            // openSaveLocationToolStripMenuItem
+            // 
+            this.openSaveLocationToolStripMenuItem.Name = "openSaveLocationToolStripMenuItem";
+            this.openSaveLocationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.openSaveLocationToolStripMenuItem.Text = "Open Save Location";
+            this.openSaveLocationToolStripMenuItem.Click += new System.EventHandler(this.openSaveLocationToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -2224,7 +2234,7 @@ namespace SSELauncher
             this.pbDrop.BackColor = System.Drawing.Color.White;
             this.pbDrop.Image = global::Properties.Resources.drop_here;
             this.pbDrop.InitialImage = null;
-            this.pbDrop.Location = new System.Drawing.Point(11, 99);
+            this.pbDrop.Location = new System.Drawing.Point(11, 60);
             this.pbDrop.Margin = new System.Windows.Forms.Padding(2);
             this.pbDrop.Name = "pbDrop";
             this.pbDrop.Size = new System.Drawing.Size(301, 304);
@@ -2236,18 +2246,6 @@ namespace SSELauncher
             // 
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(241, 6);
-            // 
-            // openSaveLocationToolStripMenuItem
-            // 
-            this.openSaveLocationToolStripMenuItem.Name = "openSaveLocationToolStripMenuItem";
-            this.openSaveLocationToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.openSaveLocationToolStripMenuItem.Text = "Open Save Location";
-            this.openSaveLocationToolStripMenuItem.Click += new System.EventHandler(this.openSaveLocationToolStripMenuItem_Click);
             // 
             // FrmMain
             // 
