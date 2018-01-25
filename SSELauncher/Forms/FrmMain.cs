@@ -1821,14 +1821,16 @@ namespace SSELauncher
             // 
             // lstApps
             // 
+            this.lstApps.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lstApps.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.lstApps.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstApps.LabelEdit = true;
             this.lstApps.LargeImageList = this.imgList;
-            this.lstApps.Location = new System.Drawing.Point(0, 0);
+            this.lstApps.Location = new System.Drawing.Point(0, 26);
             this.lstApps.Margin = new System.Windows.Forms.Padding(2);
             this.lstApps.Name = "lstApps";
-            this.lstApps.Size = new System.Drawing.Size(323, 375);
+            this.lstApps.Size = new System.Drawing.Size(323, 349);
             this.lstApps.SmallImageList = this.imgList;
             this.lstApps.TabIndex = 0;
             this.lstApps.UseCompatibleStateImageBehavior = false;
