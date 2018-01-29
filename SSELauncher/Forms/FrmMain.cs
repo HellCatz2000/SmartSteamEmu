@@ -16,18 +16,6 @@ namespace SSELauncher
 {
     public partial class FrmMain : Form
     {
-        private delegate void sort();
-
-        public class ToolStripItemComparer : IComparer
-        {
-            public int Compare(object x, object y)
-            {
-                ToolStripItem arg_0D_0 = (ToolStripItem)x;
-                ToolStripItem toolStripItem = (ToolStripItem)y;
-                return string.Compare(arg_0D_0.Text, toolStripItem.Text, true);
-            }
-        }
-
         CAppList m_AppList;
         CConfig Conf;
         string AppPath;
@@ -42,18 +30,24 @@ namespace SSELauncher
         public FrmMain()
         {
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
+
             m_AppList = Program.AppList;
             Conf = m_AppList.GetConfig();
+
             InitializeComponent();
-            base.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-            notifyIcon1.Icon = base.Icon;
-            notifyIcon1.Text = Text;
-            m_AppList.EventAppClear += new EventHandler<AppModifiedEventArgs>(OnAppClear);
-            m_AppList.EventAppAdded += new EventHandler<AppModifiedEventArgs>(OnAppAdded);
-            m_AppList.EventAppDeleted += new EventHandler<AppModifiedEventArgs>(OnAppDeleted);
-            BackgroundWorker expr_D1 = new BackgroundWorker();
-            expr_D1.DoWork += new DoWorkEventHandler(bwWorker_DoWorkInitVDF);
-            expr_D1.RunWorkerAsync();
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+
+            notifyIcon1.Icon = this.Icon; //set tray icon and title to the same as the main form
+            notifyIcon1.Text = this.Text;
+
+
+            m_AppList.EventAppClear += OnAppClear;
+            m_AppList.EventAppAdded += OnAppAdded;
+            m_AppList.EventAppDeleted += OnAppDeleted;
+
+            BackgroundWorker bwWorker = new BackgroundWorker();
+            bwWorker.DoWork += bwWorker_DoWorkInitVDF;
+            bwWorker.RunWorkerAsync();
         }
 
         protected override void WndProc(ref Message m)
@@ -72,125 +66,130 @@ namespace SSELauncher
         {
             editGameToolStripMenuItem.Enabled = false;
             deleteGameToolStripMenuItem.Enabled = false;
-            Size = new Size((Conf.WindowSizeX == 0) ? Size.Width : Conf.WindowSizeX, (Conf.WindowSizeY == 0) ? Size.Height : Conf.WindowSizeY);
-            Location = new Point((Conf.WindowPosX < 0) ? Location.X : Conf.WindowPosX, (Conf.WindowPosY < 0) ? Location.Y : Conf.WindowPosY);
+
+            this.Size = new Size((Conf.WindowSizeX == 0 ? this.Size.Width : Conf.WindowSizeX), (Conf.WindowSizeY == 0 ? this.Size.Height : Conf.WindowSizeY));
+            this.Location = new Point((Conf.WindowPosX < 0 ? this.Location.X : Conf.WindowPosX), (Conf.WindowPosY < 0 ? this.Location.Y : Conf.WindowPosY));
+
             pbDrop.Visible = true;
-            DragEnter += new DragEventHandler(lstApps_DragEnter);
-            DragDrop += new DragEventHandler(lstApps_DragDrop);
+            this.DragEnter += new DragEventHandler(lstApps_DragEnter);
+            this.DragDrop += new DragEventHandler(lstApps_DragDrop);
             m_AppList.Refresh();
             OnSelectedAppChanged();
             MenuFirstInit = false;
             SortTrayMenu();
-            FormFullyLoaded = true;
 
+            FormFullyLoaded = true;
             AdjustSize();
         }
 
         private void FrmMain_Resize(object sender, EventArgs e)
         {
-            if (!FormFullyLoaded)
-            {
-                return;
-            }
+            if (!FormFullyLoaded) return;
 
-            if (WindowState != FormWindowState.Minimized)
-            {
-                LastWindowState = WindowState;
-            }
-
+            if (WindowState != FormWindowState.Minimized) LastWindowState = WindowState;
             if (Conf.HideToTray)
             {
-                Visible = (WindowState != FormWindowState.Minimized);
+                Visible = WindowState != FormWindowState.Minimized;
             }
 
             AdjustSize();
         }
 
-        private void AdjustSize() => pbDrop.SetBounds(-10, -25, Width + 10, Height + 25);
+        private void AdjustSize()
+        {
+            pbDrop.SetBounds(-10, -25, this.Width + 10, this.Height + 25);
+        }
 
-        private void lstApps_DoubleClick(object sender, EventArgs e) => LaunchApp();
+        private void lstApps_DoubleClick(object sender, EventArgs e)
+        {
+            LaunchApp();
+        }
 
         private void lstApps_KeyPress(object sender, KeyPressEventArgs e)
         {
             OnSelectedAppChanged();
-            if (e.KeyChar == '\r')
+            if (e.KeyChar == (char)Keys.Return)
             {
                 LaunchApp();
             }
         }
 
-        private void OnSelectedAppChanged()
+        void OnSelectedAppChanged()
         {
             if (lstApps.SelectedItems.Count == 0)
             {
-                largeIconToolStripMenuItem.Checked = (lstApps.View == View.LargeIcon);
-                smallIconToolStripMenuItem.Checked = (lstApps.View == View.SmallIcon);
-                listToolStripMenuItem.Checked = (lstApps.View == View.List);
-                tileToolStripMenuItem.Checked = (lstApps.View == View.Tile);
-                nameToolStripMenuItem.Checked = (Conf.SortBy == CConfig.ESortBy.SortByName);
-                dateAddedToolStripMenuItem.Checked = (Conf.SortBy == CConfig.ESortBy.SortByDateAdded);
-                noneToolStripMenuItem.Checked = (Conf.GroupBy == CConfig.EGroupBy.GroupByNone);
-                typeToolStripMenuItem.Checked = (Conf.GroupBy == CConfig.EGroupBy.GroupByType);
-                categoryToolStripMenuItem.Checked = (Conf.GroupBy == CConfig.EGroupBy.GroupByCategory);
+                largeIconToolStripMenuItem.Checked = lstApps.View == View.LargeIcon;
+                smallIconToolStripMenuItem.Checked = lstApps.View == View.SmallIcon;
+                listToolStripMenuItem.Checked = lstApps.View == View.List;
+                tileToolStripMenuItem.Checked = lstApps.View == View.Tile;
+                nameToolStripMenuItem.Checked = Conf.SortBy == CConfig.ESortBy.SortByName;
+                dateAddedToolStripMenuItem.Checked = Conf.SortBy == CConfig.ESortBy.SortByDateAdded;
+                noneToolStripMenuItem.Checked = Conf.GroupBy == CConfig.EGroupBy.GroupByNone;
+                typeToolStripMenuItem.Checked = Conf.GroupBy == CConfig.EGroupBy.GroupByType;
+                categoryToolStripMenuItem.Checked = Conf.GroupBy == CConfig.EGroupBy.GroupByCategory;
                 hideMissingShortcutToolStripMenuItem.Checked = Conf.HideMissingShortcut;
                 lstApps.ContextMenuStrip = ctxMenuViewStrip;
+
                 editGameToolStripMenuItem.Enabled = false;
                 deleteGameToolStripMenuItem.Enabled = false;
-                return;
             }
-            lstApps.ContextMenuStrip = ctxMenuStrip;
-            editGameToolStripMenuItem.Enabled = true;
-            deleteGameToolStripMenuItem.Enabled = true;
-            ListViewItem tag = lstApps.SelectedItems[0];
-            CApp app = m_AppList.GetApp(tag);
-            if (app != null)
+            else
             {
-                launchNormallywithoutEmuToolStripMenuItem.Visible = (app.AppId != -1);
-            }
-        }
+                lstApps.ContextMenuStrip = ctxMenuStrip;
+                editGameToolStripMenuItem.Enabled = true;
+                deleteGameToolStripMenuItem.Enabled = true;
 
-        private void lstApps_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-        }
+                ListViewItem lvi = lstApps.SelectedItems[0];
+                CApp app = m_AppList.GetApp(lvi);
 
-        private void lstApps_DragDrop(object sender, DragEventArgs e)
-        {
-            string[] array = (string[])e.Data.GetData(DataFormats.FileDrop);
-            for (int i = 0; i < array.Length; i++)
-            {
-                string text = array[i];
-                CApp cApp = new CApp
+                if (app != null)
                 {
-                    Path = CApp.MakeRelativePath(text, true)
-                };
-                cApp.GameName = Path.GetFileNameWithoutExtension(cApp.Path);
-                cApp.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(cApp.Path), true);
-                if (text.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+                    launchNormallywithoutEmuToolStripMenuItem.Visible = app.AppId != -1;
+                }
+            }
+        }
+
+        void lstApps_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
+        }
+
+        void lstApps_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
+            {
+                CApp app = new CApp();
+
+                app.Path = CApp.MakeRelativePath(file);
+                app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                app.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(app.Path));
+
+                if (file.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
                 {
                     try
                     {
-                        using (ShellLink shellLink = new ShellLink(text))
+                        using (ShellLink link = new ShellLink(file))
                         {
-                            cApp.Path = CApp.MakeRelativePath(shellLink.Target, true);
-                            cApp.GameName = Path.GetFileNameWithoutExtension(cApp.Path);
-                            cApp.StartIn = CApp.MakeRelativePath(shellLink.WorkingDirectory, true);
-                            cApp.CommandLine = shellLink.Arguments;
+                            app.Path = CApp.MakeRelativePath(link.Target);
+                            app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                            app.StartIn = CApp.MakeRelativePath(link.WorkingDirectory);
+                            app.CommandLine = link.Arguments;
                         }
                     }
                     catch
-                    {
-                    }
-                }
-                if (File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "bin\\launcher.dll")) || File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "hl.exe")) || File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "hlds.exe")) || File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "hltv.exe")))
-                {
-                    cApp.CommandLine = "-steam";
+                    { }
                 }
 
-                AutoAppConfig(text, cApp);
+                if (File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "bin\\launcher.dll")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hl.exe")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hlds.exe")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hltv.exe")))
+                {
+                    app.CommandLine = "-steam";
+                }
+
+                AutoAppConfig(file, app);
             }
         }
 
@@ -206,13 +205,10 @@ namespace SSELauncher
 
         private void LaunchApp()
         {
-            if (lstApps.SelectedItems.Count == 0)
-            {
-                return;
-            }
+            if (lstApps.SelectedItems.Count == 0) return;
 
-            var tag = lstApps.SelectedItems[0];
-            CApp app = m_AppList.GetApp(tag);
+            ListViewItem lvi = lstApps.SelectedItems[0];
+            CApp app = m_AppList.GetApp(lvi);
 
             if (app.AppId == 0)
             {
@@ -223,15 +219,14 @@ namespace SSELauncher
 
                 return;
             }
-
             if (app.AppId == -1)
             {
                 LaunchWithoutEmu(app);
-
-                return;
             }
-
-            FrmMain.WriteIniAndLaunch(app, Conf, null);
+            else
+            {
+                WriteIniAndLaunch(app, Conf);
+            }
         }
 
         private void OnAppClear(object sender, AppModifiedEventArgs e)
@@ -240,95 +235,108 @@ namespace SSELauncher
             PopulateTrayLaunchMenu();
             lstApps.Groups.Clear();
             lstApps.Clear();
-            CConfig.ESortBy sortBy = Conf.SortBy;
-            if (sortBy == CConfig.ESortBy.SortByName)
+
+            switch (Conf.SortBy)
             {
-                lstApps.Sorting = SortOrder.Ascending;
-                return;
+                case CConfig.ESortBy.SortByName:
+                    lstApps.Sorting = SortOrder.Ascending;
+                    break;
+                case CConfig.ESortBy.SortByDateAdded:
+                    lstApps.Sorting = SortOrder.None;
+                    break;
             }
-            if (sortBy != CConfig.ESortBy.SortByDateAdded)
-            {
-                return;
-            }
-            lstApps.Sorting = SortOrder.None;
         }
 
         private void OnAppAdded(object sender, AppModifiedEventArgs e)
         {
-            if (Conf.HideMissingShortcut && !new FileInfo(CApp.GetAbsolutePath(e.app.Path)).Exists)
+            if (Conf.HideMissingShortcut)
             {
-                return;
+                FileInfo fi = new FileInfo(CApp.GetAbsolutePath(e.app.Path));
+                if (!fi.Exists)
+                {
+                    return;
+                }
             }
-            ListViewItem listViewItem = new ListViewItem(e.app.GameName);
-            SetListViewItemGroup(e.app, listViewItem);
+
+            ListViewItem lvi = new ListViewItem(e.app.GameName);
+            SetListViewItemGroup(e.app, lvi);
             DoRefreshCategories(e.app);
+
             try
             {
-                listViewItem.ImageKey = e.app.GetIconHash();
-                BackgroundWorker expr_6A = new BackgroundWorker();
-                expr_6A.DoWork += new DoWorkEventHandler(bwWorker_DoWork);
-                expr_6A.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwWorker_RunWorkerCompleted);
-                expr_6A.RunWorkerAsync(new BgParam(listViewItem.GetHashCode().ToString(), e.app));
+                lvi.ImageKey = e.app.GetIconHash();
+                BackgroundWorker bwWorker = new BackgroundWorker();
+                bwWorker.DoWork += bwWorker_DoWork;
+                bwWorker.RunWorkerCompleted += bwWorker_RunWorkerCompleted;
+                bwWorker.RunWorkerAsync(new BgParam(lvi.GetHashCode().ToString(), e.app));
             }
             catch
             {
+
             }
-            e.tag = lstApps.Items.Add(listViewItem);
+
+            e.tag = lstApps.Items.Add(lvi);
             e.app.Tag = e.tag;
             AddTrayLaunchMenu(e.app);
             pbDrop.Visible = false;
             lstApps.Sort();
         }
 
-        private void bwWorker_DoWorkInitVDF(object sender, DoWorkEventArgs e)
+        void bwWorker_DoWorkInitVDF(object sender, DoWorkEventArgs e)
         {
             try
             {
-                using (RegistryKey registryKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                using (RegistryKey regBase = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
                 {
-                    if (registryKey != null)
+                    if (regBase != null)
                     {
-                        RegistryKey registryKey2 = registryKey.OpenSubKey("SOFTWARE\\Valve\\Steam");
-                        if (registryKey2 != null)
+                        RegistryKey regSteam = regBase.OpenSubKey("SOFTWARE\\Valve\\Steam");
+                        if (regSteam != null)
                         {
-                            SteamInstallPath = registryKey2.GetValue("InstallPath").ToString();
+                            SteamInstallPath = regSteam.GetValue("InstallPath").ToString();
+
+                            // Probably initialize this on background worker for faster startup
                             appinfoVDF = new AppInfoVDF(Path.Combine(SteamInstallPath, "appcache\\appinfo.vdf"));
                         }
                     }
                 }
             }
             catch
-            {
-            }
+            { }
         }
 
-        private void bwWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        void bwWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            BgParam bgParam = (BgParam)e.Result;
-            if (bgParam.AppIcon != null)
+            BgParam param = (BgParam)e.Result;
+
+            if (param.AppIcon != null)
             {
-                imgList.Images.Add(bgParam.App.GetIconHash(), bgParam.AppIcon);
+                imgList.Images.Add(param.App.GetIconHash(), param.AppIcon);
             }
-            EditTrayLaunchMenu(bgParam.App, true);
+
+            EditTrayLaunchMenu(param.App, true);
         }
 
-        private void bwWorker_DoWork(object sender, DoWorkEventArgs e)
+        void bwWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            BgParam bgParam = (BgParam)e.Argument;
-            bgParam.AppIcon = CAppList.GetIcon(bgParam.App);
-            e.Result = bgParam;
+            BgParam param = (BgParam)e.Argument;
+            param.AppIcon = CAppList.GetIcon(param.App);
+            e.Result = param;
         }
 
         private void OnAppDeleted(object sender, AppModifiedEventArgs e)
         {
             DeleteTrayLaunchMenu(e.tag);
             lstApps.Items.Remove((ListViewItem)e.tag);
+
             if (lstApps.Items.Count > 0)
             {
                 pbDrop.Visible = false;
-                return;
             }
-            pbDrop.Visible = true;
+            else
+            {
+                pbDrop.Visible = true;
+            }
         }
 
         public static void WriteIniAndLaunch(CApp app, CConfig gconf, string extra_commandline = null)
@@ -556,19 +564,17 @@ namespace SSELauncher
         {
             if (!string.IsNullOrEmpty(app.Category))
             {
-                bool flag = false;
-                using (List<string>.Enumerator enumerator = AvailableCategories.GetEnumerator())
+                bool CatDup = false;
+                foreach (string s in AvailableCategories)
                 {
-                    while (enumerator.MoveNext())
+                    if (s == app.Category)
                     {
-                        if (enumerator.Current == app.Category)
-                        {
-                            flag = true;
-                            break;
-                        }
+                        CatDup = true;
+                        break;
                     }
                 }
-                if (!flag)
+
+                if (CatDup == false)
                 {
                     AvailableCategories.Add(app.Category);
                 }
@@ -577,358 +583,368 @@ namespace SSELauncher
 
         private void DoEditGame()
         {
-            if (lstApps.SelectedItems.Count == 0)
-            {
-                return;
-            }
+            if (lstApps.SelectedItems.Count == 0) return;
 
-            var listViewItem = lstApps.SelectedItems[0];
-
-            CApp app = m_AppList.GetApp(listViewItem);
+            ListViewItem lvi = lstApps.SelectedItems[0];
+            CApp app = m_AppList.GetApp(lvi);
 
             if (app == null)
             {
                 return;
             }
 
-            var frmAppSetting = new FrmAppSetting
-            {
-                CategoryList = AvailableCategories
-            };
-
-            frmAppSetting.SetEditApp(app, Conf);
-
+            FrmAppSetting appSetting = new FrmAppSetting();
+            appSetting.CategoryList = AvailableCategories;
+            appSetting.SetEditApp(app, Conf);
+            DialogResult res = appSetting.ShowDialog();
+            appSetting.Dispose();
             DoRefreshCategories(app);
 
-            if (frmAppSetting.ShowDialog() == DialogResult.OK)
+            if (res == DialogResult.OK)
             {
-                listViewItem.Text = app.GameName;
-                listViewItem.ImageKey = app.GetIconHash();
+                lvi.Text = app.GameName;
+
+                // TODO: Unused icon will be stored in memory. It should be removed.
+                lvi.ImageKey = app.GetIconHash();
                 if (imgList.Images[app.GetIconHash()] == null)
                 {
                     try
                     {
-                        var bw = new BackgroundWorker();
-
-                        bw.DoWork += new DoWorkEventHandler(bwWorker_DoWork);
-                        bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwWorker_RunWorkerCompleted);
-                        bw.RunWorkerAsync(new BgParam(listViewItem.ImageKey, app));
+                        BackgroundWorker bwWorker = new BackgroundWorker();
+                        bwWorker.DoWork += bwWorker_DoWork;
+                        bwWorker.RunWorkerCompleted += bwWorker_RunWorkerCompleted;
+                        bwWorker.RunWorkerAsync(new BgParam(lvi.ImageKey, app));
                     }
                     catch
                     {
+
                     }
                 }
-                SetListViewItemGroup(app, listViewItem);
+
+                SetListViewItemGroup(app, lvi);
                 EditTrayLaunchMenu(app, false);
             }
+
             m_AppList.Save();
             lstApps.Sort();
         }
 
         private void DoDeleteGame()
         {
-            if (lstApps.SelectedItems.Count == 0)
+            if (lstApps.SelectedItems.Count == 0) return;
+
+            if (MessageBox.Show("Are you sure you want to delete this item(s)?", "Delete Game From List", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.No)
             {
                 return;
             }
-            if (MessageBox.Show("Are you sure you want to delete this item(s)?", "Delete Game From List", MessageBoxButtons.YesNo) == DialogResult.No)
+
+            foreach (ListViewItem lvi in lstApps.SelectedItems)
             {
-                return;
-            }
-            foreach (ListViewItem tag in lstApps.SelectedItems)
-            {
-                m_AppList.DeleteApp(tag);
+                m_AppList.DeleteApp(lvi);
             }
         }
 
         private void DoSorting()
         {
-            CConfig.ESortBy sortBy = Conf.SortBy;
-            if (sortBy != CConfig.ESortBy.SortByName)
+            switch (Conf.SortBy)
             {
-                if (sortBy == CConfig.ESortBy.SortByDateAdded)
-                {
+                case CConfig.ESortBy.SortByName:
+                    lstApps.Sorting = SortOrder.Ascending;
+                    break;
+                case CConfig.ESortBy.SortByDateAdded:
                     lstApps.Sorting = SortOrder.None;
-                }
+                    break;
             }
-            else
-            {
-                lstApps.Sorting = SortOrder.Ascending;
-            }
+
             lstApps.Sort();
         }
 
         private void SetListViewItemGroup(CApp app, ListViewItem lvi)
         {
-            CConfig.EGroupBy groupBy = Conf.GroupBy;
-            if (groupBy == CConfig.EGroupBy.GroupByType)
+            switch (Conf.GroupBy)
             {
-                ListViewGroup listViewGroup = null;
-                ListViewGroup listViewGroup2 = null;
-                if (lstApps.Groups.Count == 0)
-                {
-                    listViewGroup = new ListViewGroup("Steam", HorizontalAlignment.Left);
-                    listViewGroup2 = new ListViewGroup("Non-steam", HorizontalAlignment.Left);
-                    lstApps.Groups.Add(listViewGroup);
-                    lstApps.Groups.Add(listViewGroup2);
-                }
-                foreach (ListViewGroup listViewGroup3 in lstApps.Groups)
-                {
-                    if (listViewGroup3.Header == "Steam")
+                case CConfig.EGroupBy.GroupByType:
                     {
-                        listViewGroup = listViewGroup3;
+                        ListViewGroup grpSteam = null, grpNonSteam = null;
+                        if (lstApps.Groups.Count == 0)
+                        {
+                            grpSteam = new ListViewGroup("Steam", HorizontalAlignment.Left);
+                            grpNonSteam = new ListViewGroup("Non-steam", HorizontalAlignment.Left);
+
+                            lstApps.Groups.Add(grpSteam);
+                            lstApps.Groups.Add(grpNonSteam);
+                        }
+
+                        foreach (ListViewGroup lvg in lstApps.Groups)
+                        {
+                            if (lvg.Header == "Steam")
+                            {
+                                grpSteam = lvg;
+                            }
+                            else
+                            {
+                                grpNonSteam = lvg;
+                            }
+                        }
+
+                        lvi.Group = (app.AppId >= 0 ? grpSteam : grpNonSteam);
                     }
-                    else
+                    break;
+                case CConfig.EGroupBy.GroupByCategory:
                     {
-                        listViewGroup2 = listViewGroup3;
+                        ListViewGroup grpCat = null;
+
+                        if (!string.IsNullOrEmpty(app.Category))
+                        {
+                            foreach (ListViewGroup lvg in lstApps.Groups)
+                            {
+                                if (lvg.Header == app.Category)
+                                {
+                                    grpCat = lvg;
+                                }
+                            }
+
+                            if (grpCat == null)
+                            {
+                                grpCat = new ListViewGroup(app.Category, HorizontalAlignment.Left);
+                                lstApps.Groups.Add(grpCat);
+                            }
+
+                            lvi.Group = grpCat;
+                        }
                     }
-                }
-                lvi.Group = ((app.AppId >= 0) ? listViewGroup : listViewGroup2);
-                return;
-            }
-            if (groupBy != CConfig.EGroupBy.GroupByCategory)
-            {
-                return;
-            }
-            ListViewGroup listViewGroup4 = null;
-            if (!string.IsNullOrEmpty(app.Category))
-            {
-                foreach (ListViewGroup listViewGroup5 in lstApps.Groups)
-                {
-                    if (listViewGroup5.Header == app.Category)
-                    {
-                        listViewGroup4 = listViewGroup5;
-                    }
-                }
-                if (listViewGroup4 == null)
-                {
-                    listViewGroup4 = new ListViewGroup(app.Category, HorizontalAlignment.Left);
-                    lstApps.Groups.Add(listViewGroup4);
-                }
-                lvi.Group = listViewGroup4;
+                    break;
             }
         }
 
         private void OnAddGame()
         {
-            var openFileDialog = new OpenFileDialog
-            {
-                Filter = "Game executables (*.exe)|*.exe;*.bat;*.cmd;*.lnk|All Files|*.*",
-                FilterIndex = 1,
-                Multiselect = false
-            };
+            OpenFileDialog ofd = new OpenFileDialog();
 
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                CApp cApp = new CApp();
+            ofd.Filter = "Game executables (*.exe)|*.exe;*.bat;*.cmd;*.lnk|All Files|*.*";
+            ofd.FilterIndex = 1;
+            ofd.Multiselect = false;
 
-                if (openFileDialog.FileName.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                CApp app = new CApp();
+
+                if (ofd.FileName.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
                 {
                     try
                     {
-                        using (ShellLink shellLink = new ShellLink(openFileDialog.FileName))
+                        using (ShellLink link = new ShellLink(ofd.FileName))
                         {
-                            cApp.Path = CApp.MakeRelativePath(shellLink.Target, true);
-                            cApp.GameName = Path.GetFileNameWithoutExtension(cApp.Path);
-                            cApp.StartIn = CApp.MakeRelativePath(shellLink.WorkingDirectory, true);
-                            cApp.CommandLine = shellLink.Arguments;
+                            app.Path = CApp.MakeRelativePath(link.Target);
+                            app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                            app.StartIn = CApp.MakeRelativePath(link.WorkingDirectory);
+                            app.CommandLine = link.Arguments;
                         }
-                        goto IL_DC;
                     }
                     catch
-                    {
-                        goto IL_DC;
-                    }
+                    { }
                 }
-
-                cApp.Path = CApp.MakeRelativePath(openFileDialog.FileName, true);
-                cApp.GameName = Path.GetFileNameWithoutExtension(cApp.Path);
-                cApp.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(openFileDialog.FileName), true);
-
-            IL_DC:
-                if (File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "bin\\launcher.dll")) || File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "hl.exe")) || File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "hlds.exe")) || File.Exists(Path.Combine(CApp.GetAbsolutePath(cApp.StartIn), "hltv.exe")))
+                else
                 {
-                    cApp.CommandLine = "-steam";
+                    app.Path = CApp.MakeRelativePath(ofd.FileName);
+                    app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                    app.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(ofd.FileName));
                 }
 
-                AutoAppConfig(CApp.GetAbsolutePath(cApp.Path), cApp);
+                if (File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "bin\\launcher.dll")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hl.exe")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hlds.exe")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hltv.exe")))
+                {
+                    app.CommandLine = "-steam";
+                }
+
+                AutoAppConfig(CApp.GetAbsolutePath(app.Path), app);
             }
         }
 
-        private void AutoAppConfig(string path, CApp app)
+        void AutoAppConfig(string path, CApp app)
         {
             if (appinfoVDF == null)
             {
-                var frmAppSetting = new FrmAppSetting
-                {
-                    CategoryList = AvailableCategories
-                };
-
-                frmAppSetting.SetEditApp(app, Conf);
-
+                FrmAppSetting appSetting = new FrmAppSetting();
+                appSetting.CategoryList = AvailableCategories;
+                appSetting.SetEditApp(app, Conf);
+                DialogResult res = appSetting.ShowDialog();
+                appSetting.Dispose();
                 DoRefreshCategories(app);
 
-                if (frmAppSetting.ShowDialog() == DialogResult.OK)
+                if (res == DialogResult.OK)
                 {
                     m_AppList.AddApp(app);
                 }
 
                 m_AppList.Save();
-
                 return;
             }
 
-            List<CApp> list = new List<CApp>();
-            List<AppInfoItem> list2 = new List<AppInfoItem>();
-            FileInfo fileInfo = new FileInfo(path);
-            if (fileInfo.Exists)
+            List<CApp> SSEList = new List<CApp>();
+            List<AppInfoItem> AIIList = new List<AppInfoItem>();
+            FileInfo fi = new FileInfo(path);
+
+            if (fi.Exists)
             {
-                string text = fileInfo.DirectoryName;
-                List<AppConfig> list3 = new List<AppConfig>();
-                int num = text.LastIndexOf("\\");
-                if (num > -1)
+                //Work out the directory the exe in is, it may not necessarily be the root install folder so we'll go back 3 dirs if possible!
+                //note: i'm not assuming anything is in steampps\\common
+
+                String DirName = fi.DirectoryName;
+                List<AppConfig> AppConfigs = new List<AppConfig>();
+
+                Int32 IDX = DirName.LastIndexOf("\\");
+                if (IDX > -1)
                 {
-                    AppConfig item = new AppConfig(text, text.Substring(num + 1), fileInfo.FullName.Substring(text.Length + 1));
-                    list3.Add(item);
-                    text = text.Substring(0, num);
+                    AppConfig ac = new AppConfig(DirName, DirName.Substring(IDX + 1), fi.FullName.Substring(DirName.Length + 1));
+                    AppConfigs.Add(ac);
+                    DirName = DirName.Substring(0, IDX);
                 }
-                num = text.LastIndexOf("\\");
-                if (num > -1)
+
+                IDX = DirName.LastIndexOf("\\");
+                if (IDX > -1)
                 {
-                    AppConfig item2 = new AppConfig(text, text.Substring(num + 1), fileInfo.FullName.Substring(text.Length + 1));
-                    list3.Add(item2);
-                    text = text.Substring(0, num);
+                    AppConfig ac = new AppConfig(DirName, DirName.Substring(IDX + 1), fi.FullName.Substring(DirName.Length + 1));
+                    AppConfigs.Add(ac);
+                    DirName = DirName.Substring(0, IDX);
                 }
-                num = text.LastIndexOf("\\");
-                if (num > -1)
+
+                IDX = DirName.LastIndexOf("\\");
+                if (IDX > -1)
                 {
-                    AppConfig item3 = new AppConfig(text, text.Substring(num + 1), fileInfo.FullName.Substring(text.Length + 1));
-                    list3.Add(item3);
-                    text = text.Substring(0, num);
+                    AppConfig ac = new AppConfig(DirName, DirName.Substring(IDX + 1), fi.FullName.Substring(DirName.Length + 1));
+                    AppConfigs.Add(ac);
+                    DirName = DirName.Substring(0, IDX);
                 }
-                foreach (AppConfig current in list3)
+
+                foreach (AppConfig ac in AppConfigs)
                 {
-                    List<AppInfoItem> appInfoItem = appinfoVDF.GetAppInfoItem(current.Folder, current.Exe);
-                    if (appInfoItem.Count > 0)
+                    List<AppInfoItem> matchingApps = appinfoVDF.GetAppInfoItem(ac.Folder, ac.Exe);
+                    if (matchingApps.Count > 0)
                     {
-                        current.Matched = true;
-                        list2.AddRange(appInfoItem);
+                        ac.Matched = true;
+                        AIIList.AddRange(matchingApps);
                     }
                 }
-                foreach (AppInfoItem current2 in list2)
+
+                foreach (AppInfoItem AII in AIIList)
                 {
-                    string keyValue = current2.AppInfoKey.GetKeyValue("gamedir");
-                    foreach (AppConfig current3 in list3)
+                    String gamedir = AII.AppInfoKey.GetKeyValue("gamedir");
+
+                    foreach (AppConfig ac in AppConfigs)
                     {
-                        if (current3.Matched)
+                        if (ac.Matched)
                         {
-                            AppInfoItemKey key = current2.AppInfoKey.GetKey("launch", current2.AppInfoKey);
-                            string keyValue2 = current2.AppInfoKey.GetKeyValue("name");
-                            bool hasGameDir = Directory.Exists(Path.Combine(current3.Path, keyValue));
-                            if (key != null)
+                            AppInfoItemKey AIIK = AII.AppInfoKey.GetKey("launch", AII.AppInfoKey);
+                            String Name = AII.AppInfoKey.GetKeyValue("name");
+                            bool HasGameDir = Directory.Exists(Path.Combine(ac.Path, gamedir));
+
+                            if (AIIK != null)
                             {
-                                foreach (AppInfoItemKey current4 in key.keys)
+                                //launch options exist for this app
+                                foreach (AppInfoItemKey AIIKL in AIIK.keys)
                                 {
-                                    string text2 = current4.GetKeyValue("oslist").ToLower();
-                                    if (text2 == "" || text2.ToLower() == "windows")
+                                    String os = AIIKL.GetKeyValue("oslist").ToLower();
+
+                                    if (os == "" || os.ToLower() == "windows")
                                     {
-                                        string path2 = current3.Path;
-                                        CApp cApp = new CApp(app)
-                                        {
-                                            AppId = (int)current2.AppID
-                                        };
-                                        string text3 = current4.GetKeyValue("workingdir");
-                                        if (text3.Length > 0)
-                                        {
-                                            text3 = Path.Combine(path2, text3);
-                                        }
-                                        string keyValue3 = current4.GetKeyValue("description");
-                                        string gameName = keyValue2;
-                                        if (keyValue3.Length > 0)
-                                        {
-                                            gameName = keyValue3;
-                                        }
-                                        cApp.Path = Path.Combine(path2, current4.GetKeyValue("executable"));
-                                        cApp.CommandLine = current4.GetKeyValue("arguments");
-                                        cApp.GameName = gameName;
-                                        cApp.StartIn = (string.IsNullOrEmpty(text3) ? path2 : text3);
-                                        cApp.HasGameDir = hasGameDir;
-                                        list.Add(cApp);
+                                        String AppPath = ac.Path;
+                                        CApp SSELO = new CApp(app);
+                                        SSELO.AppId = (int)AII.AppID;
+                                        //SSELO.DLCList = AII.AppInfoKey.GetKeyValue("listofdlc"); TODO
+
+                                        //we could filter for windows os here if required
+                                        //for now i'm just loading the key if the exe matches
+                                        //this handles things like duke3d
+
+                                        String WorkDir = AIIKL.GetKeyValue("workingdir");
+                                        if (WorkDir.Length > 0)
+                                            WorkDir = Path.Combine(AppPath, WorkDir);
+
+                                        String Description = AIIKL.GetKeyValue("description");
+                                        String NameAsDesc = Name;
+                                        if (Description.Length > 0)
+                                            NameAsDesc = Description;
+
+                                        SSELO.Path = Path.Combine(AppPath, AIIKL.GetKeyValue("executable"));
+                                        SSELO.CommandLine = AIIKL.GetKeyValue("arguments");
+                                        SSELO.GameName = NameAsDesc;
+                                        SSELO.StartIn = (String.IsNullOrEmpty(WorkDir) ? AppPath : WorkDir);
+                                        SSELO.HasGameDir = HasGameDir;
+                                        SSEList.Add(SSELO);
                                     }
                                 }
-                                if (list.Count == 1)
+
+                                if (SSEList.Count == 1)
                                 {
-                                    list[0].GameName = keyValue2;
+                                    SSEList[0].GameName = Name;
                                 }
                             }
                         }
                     }
                 }
             }
-            if (list.Count <= 1)
+
+            if (SSEList.Count <= 1)
             {
                 try
                 {
-                    app.Copy(list[0]);
+                    app.Copy(SSEList[0]);
                 }
                 catch
-                {
-                }
+                { }
 
-                var frmAppSetting = new FrmAppSetting
-                {
-                    CategoryList = AvailableCategories
-                };
-
-                frmAppSetting.SetEditApp(app, Conf);
-
+                FrmAppSetting appSetting = new FrmAppSetting();
+                appSetting.CategoryList = AvailableCategories;
+                appSetting.SetEditApp(app, Conf);
+                DialogResult res = appSetting.ShowDialog();
+                appSetting.Dispose();
                 DoRefreshCategories(app);
 
-                if (frmAppSetting.ShowDialog() == DialogResult.OK)
+                if (res == DialogResult.OK)
                 {
                     m_AppList.AddApp(app);
                 }
             }
             else
             {
-                var frmAppMulti = new FrmAppMulti
-                {
-                    Apps = list
-                };
+                DialogResult res;
+                FrmAppMulti appMulti = new FrmAppMulti();
+                appMulti.Apps = SSEList;
+                res = appMulti.ShowDialog();
 
-                var dialogResult3 = frmAppMulti.ShowDialog();
-
-                if (dialogResult3 == DialogResult.Yes)
+                if (res == DialogResult.Yes)
                 {
-                    foreach (var currentApp in frmAppMulti.SelectedApps)
+                    foreach (CApp selectedApp in appMulti.SelectedApps)
                     {
-                        m_AppList.AddApp(currentApp);
+                        m_AppList.AddApp(selectedApp);
                     }
                 }
-                if (dialogResult3 == DialogResult.No)
+                else if (res == DialogResult.No)
                 {
-                    if (frmAppMulti.SelectedApp != null)
+                    if (appMulti.SelectedApp != null)
                     {
-                        app.Copy(frmAppMulti.SelectedApp);
+                        app.Copy(appMulti.SelectedApp);
                     }
 
-                    var frmAppSetting = new FrmAppSetting
-                    {
-                        CategoryList = AvailableCategories
-                    };
-
-                    frmAppSetting.SetEditApp(app, Conf);
-
-                    dialogResult3 = frmAppSetting.ShowDialog();
-
+                    FrmAppSetting appSetting = new FrmAppSetting();
+                    appSetting.CategoryList = AvailableCategories;
+                    appSetting.SetEditApp(app, Conf);
+                    res = appSetting.ShowDialog();
+                    appSetting.Dispose();
                     DoRefreshCategories(app);
 
-                    if (dialogResult3 == DialogResult.OK)
+                    if (res == DialogResult.OK)
                     {
                         m_AppList.AddApp(app);
                     }
                 }
+
+                appMulti.Dispose();
             }
+
             m_AppList.Save();
         }
 
@@ -949,10 +965,11 @@ namespace SSELauncher
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FrmSettings expr_05 = new FrmSettings();
-            expr_05.SetConfig(Conf);
-            expr_05.ShowDialog();
-            expr_05.Dispose();
+            FrmSettings settings = new FrmSettings();
+            settings.SetConfig(Conf);
+            settings.ShowDialog();
+            settings.Dispose();
+
             m_AppList.Save();
         }
 
@@ -978,9 +995,9 @@ namespace SSELauncher
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FrmAbout expr_05 = new FrmAbout();
-            expr_05.ShowDialog();
-            expr_05.Dispose();
+            FrmAbout about = new FrmAbout();
+            about.ShowDialog();
+            about.Dispose();
         }
 
         private void addGameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -989,34 +1006,35 @@ namespace SSELauncher
 
         private void launchNormallywithoutEmuToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (lstApps.SelectedItems.Count == 0)
-            {
-                return;
-            }
-            ListViewItem tag = lstApps.SelectedItems[0];
-            CApp app = m_AppList.GetApp(tag);
+            if (lstApps.SelectedItems.Count == 0) return;
+
+            ListViewItem lvi = lstApps.SelectedItems[0];
+            CApp app = m_AppList.GetApp(lvi);
+
             LaunchWithoutEmu(app);
         }
 
         private void LaunchWithoutEmu(CApp app)
         {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo
-            {
-                CreateNoWindow = false,
-                UseShellExecute = true,
-                FileName = CApp.GetAbsolutePath(app.Path),
-                WorkingDirectory = CApp.GetAbsolutePath(app.StartIn),
-                WindowStyle = ProcessWindowStyle.Normal,
-                Arguments = app.CommandLine
-            };
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = true;
+            startInfo.FileName = CApp.GetAbsolutePath(app.Path);
+            startInfo.WorkingDirectory = CApp.GetAbsolutePath(app.StartIn);
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
+            startInfo.Arguments = app.CommandLine;
+            //startInfo.Verb = "runas";
+
             try
             {
-                using (Process.Start(processStartInfo))
+                using (Process exeProcess = Process.Start(startInfo))
                 {
+
                 }
             }
             catch
             {
+
             }
         }
 
@@ -1059,37 +1077,40 @@ namespace SSELauncher
         {
             try
             {
-                ListViewItem tag = lstApps.SelectedItems[0];
-                CApp app = m_AppList.GetApp(tag);
-                Regex arg_3C_0 = new Regex("[\\\\/?:*?\"<>|]");
-                string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                string str = arg_3C_0.Replace(app.GameName, "");
-                string linkFile = Path.Combine(folderPath, str + ".lnk");
-                using (ShellLink shellLink = new ShellLink())
+                ListViewItem lvi = lstApps.SelectedItems[0];
+                CApp app = m_AppList.GetApp(lvi);
+
+                Regex pattern = new Regex("[\\\\/?:*?\"<>|]");
+
+                string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                string sanitizedName = pattern.Replace(app.GameName, "");
+                string shortcutPath = Path.Combine(deskDir, sanitizedName + ".lnk");
+
+                using (ShellLink link = new ShellLink())
                 {
                     if (app.AppId != -1)
                     {
-                        shellLink.Target = Application.ExecutablePath;
-                        shellLink.WorkingDirectory = Path.GetDirectoryName(Application.ExecutablePath);
-                        shellLink.Arguments = "-appid " + app.AppId;
-                        shellLink.IconPath = CApp.GetAbsolutePath(string.IsNullOrEmpty(app.IconPath) ? app.Path : app.IconPath);
-                        shellLink.Description = "Play " + app.GameName;
-                        shellLink.Save(linkFile);
+                        link.Target = Application.ExecutablePath;
+                        link.WorkingDirectory = Path.GetDirectoryName(Application.ExecutablePath);
+                        link.Arguments = "-appid " + app.AppId;
+                        link.IconPath = CApp.GetAbsolutePath(String.IsNullOrEmpty(app.IconPath) ? app.Path : app.IconPath);
+                        link.Description = "Play " + app.GameName;
+                        link.Save(shortcutPath);
                     }
                     else
                     {
-                        shellLink.Target = CApp.GetAbsolutePath(app.Path);
-                        shellLink.WorkingDirectory = Path.GetDirectoryName(CApp.GetAbsolutePath(app.Path));
-                        shellLink.Arguments = app.CommandLine;
-                        shellLink.IconPath = CApp.GetAbsolutePath(string.IsNullOrEmpty(app.IconPath) ? app.Path : app.IconPath);
-                        shellLink.Description = "Run " + app.GameName;
-                        shellLink.Save(linkFile);
+                        link.Target = CApp.GetAbsolutePath(app.Path);
+                        link.WorkingDirectory = Path.GetDirectoryName(CApp.GetAbsolutePath(app.Path));
+                        link.Arguments = app.CommandLine;
+                        link.IconPath = CApp.GetAbsolutePath(String.IsNullOrEmpty(app.IconPath) ? app.Path : app.IconPath);
+                        link.Description = "Run " + app.GameName;
+                        link.Save(shortcutPath);
                     }
                 }
             }
-            catch (Exception arg_177_0)
+            catch (Exception ex)
             {
-                MessageBox.Show(arg_177_0.Message, "Error creating shortcut");
+                MessageBox.Show(ex.Message, "Error creating shortcut");
             }
         }
 
@@ -1101,21 +1122,23 @@ namespace SSELauncher
             }
         }
 
+        delegate void sort();
         private void lstApps_AfterLabelEdit(object sender, LabelEditEventArgs e)
         {
             CApp app = m_AppList.GetApp(lstApps.Items[e.Item]);
-            if (app == null)
-            {
-                return;
-            }
-            if (string.IsNullOrEmpty(e.Label) || string.IsNullOrWhiteSpace(e.Label))
+            if (app == null) return;
+
+            if (String.IsNullOrEmpty(e.Label) || String.IsNullOrWhiteSpace(e.Label))
             {
                 lstApps.Items[e.Item].Text = app.GameName;
                 return;
             }
+
             app.GameName = e.Label;
+
             EditTrayLaunchMenu(app, false);
-            lstApps.BeginInvoke(new FrmMain.sort(lstApps.Sort));
+
+            lstApps.BeginInvoke(new sort(lstApps.Sort));
         }
 
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1155,19 +1178,22 @@ namespace SSELauncher
 
         private void FrmMain_Closing(object sender, FormClosingEventArgs e)
         {
-            notifyIcon1.Icon = null;
-            if (WindowState == FormWindowState.Normal)
+            notifyIcon1.Icon = null; //ensures icon will be removed correctly from the tray
+
+            if (this.WindowState == FormWindowState.Normal)
             {
-                Conf.WindowSizeX = Size.Width;
-                Conf.WindowSizeY = Size.Height;
-                Conf.WindowPosX = Location.X;
-                Conf.WindowPosY = Location.Y;
-                return;
+                Conf.WindowSizeX = this.Size.Width;
+                Conf.WindowSizeY = this.Size.Height;
+                Conf.WindowPosX = this.Location.X;
+                Conf.WindowPosY = this.Location.Y;
             }
-            Conf.WindowSizeX = base.RestoreBounds.Size.Width;
-            Conf.WindowSizeY = base.RestoreBounds.Size.Height;
-            Conf.WindowPosX = base.RestoreBounds.Location.X;
-            Conf.WindowPosY = base.RestoreBounds.Location.Y;
+            else
+            {
+                Conf.WindowSizeX = this.RestoreBounds.Size.Width;
+                Conf.WindowSizeY = this.RestoreBounds.Size.Height;
+                Conf.WindowPosX = this.RestoreBounds.Location.X;
+                Conf.WindowPosY = this.RestoreBounds.Location.Y;
+            }
         }
 
         private void hideMissingShortcutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1185,349 +1211,362 @@ namespace SSELauncher
 
         private void NotifyMenu_Click(object sender, EventArgs e)
         {
-            ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem)sender;
-            string text = toolStripMenuItem.Text;
-            if (text == "About")
+            ToolStripMenuItem menu = (ToolStripMenuItem)sender;
+            string mnuText = menu.Text;
+
+            switch (mnuText)
             {
-                aboutToolStripMenuItem_Click(sender, e);
-                return;
+                case "About":
+                    aboutToolStripMenuItem_Click(sender, e);
+                    break;
+                case "Exit":
+                    Application.Exit();
+                    break;
+                case "Settings":
+                    settingsToolStripMenuItem_Click(sender, e);
+                    break;
+                case "Open":
+                    Visible = true;
+                    WindowState = LastWindowState;
+                    Activate();
+                    break;
+                default:
+                    //launch app
+                    TrayLaunchApp(menu);
+                    break;
             }
-            if (text == "Exit")
-            {
-                Application.Exit();
-                return;
-            }
-            if (text == "Settings")
-            {
-                settingsToolStripMenuItem_Click(sender, e);
-                return;
-            }
-            if (!(text == "Open"))
-            {
-                TrayLaunchApp(toolStripMenuItem);
-                return;
-            }
-            Visible = true;
-            WindowState = LastWindowState;
-            Activate();
+
         }
 
         private void TrayLaunchApp(ToolStripMenuItem menuObject)
         {
             CApp app = m_AppList.GetApp(menuObject.Tag);
+
             if (app != null)
             {
                 if (app.AppId == -1)
                 {
                     LaunchWithoutEmu(app);
-                    return;
                 }
-                FrmMain.WriteIniAndLaunch(app, Conf, null);
+                else
+                {
+                    WriteIniAndLaunch(app, Conf);
+                }
             }
         }
 
         private void AddTrayLaunchMenu(CApp app)
         {
-            if (!string.IsNullOrWhiteSpace(app.Category))
-            {
-                ToolStripItem[] array = mnuTrayMenu.Items.Find(app.Category, true);
-                ToolStripMenuItem toolStripMenuItem;
-                if (array.Length < 1)
-                {
-                    toolStripMenuItem = new ToolStripMenuItem
-                    {
-                        Name = app.Category,
-                        Text = app.Category
-                    };
+            ToolStripMenuItem mnuTrayContent;
 
-                    mnuTrayMenu.Items.Add(toolStripMenuItem);
+            if (!string.IsNullOrWhiteSpace(app.Category)) //add by category
+            {
+                ToolStripItem[] mnuItmCategory = mnuTrayMenu.Items.Find(app.Category, true);
+                if (mnuItmCategory.Length < 1)
+                {
+                    mnuTrayContent = new ToolStripMenuItem();
+                    mnuTrayContent.Name = app.Category;
+                    mnuTrayContent.Text = app.Category;
+                    mnuTrayMenu.Items.Add(mnuTrayContent);
                 }
                 else
                 {
-                    toolStripMenuItem = (ToolStripMenuItem)array[0];
+                    mnuTrayContent = (ToolStripMenuItem)mnuItmCategory[0];
                 }
-                ToolStripMenuItem toolStripMenuItem2 = new ToolStripMenuItem
-                {
-                    Name = app.GameName,
-                    Text = app.GameName,
-                    Tag = app.Tag,
-                    Image = imgList.Images[app.GetIconHash()]
-                };
 
-                toolStripMenuItem2.Click += new EventHandler(NotifyMenu_Click);
-                toolStripMenuItem.DropDownItems.Add(toolStripMenuItem2);
-                ResortToolStripItemCollection(toolStripMenuItem.DropDownItems);
-            }
-            else if (app.AppId == -1)
-            {
-                ToolStripItem[] array2 = mnuTrayMenu.Items.Find("Non-Steam", true);
-                ToolStripMenuItem toolStripMenuItem;
-                if (array2.Length < 1)
-                {
-                    toolStripMenuItem = new ToolStripMenuItem();
-                    toolStripMenuItem.Name = "Non-Steam";
-                    toolStripMenuItem.Text = "Non-Steam";
-                    mnuTrayMenu.Items.Add(toolStripMenuItem);
-                    mnuTrayMenu.Refresh();
-                }
-                else
-                {
-                    toolStripMenuItem = (ToolStripMenuItem)array2[0];
-                }
-                ToolStripMenuItem toolStripMenuItem3 = new ToolStripMenuItem();
-                toolStripMenuItem3.Name = app.GameName;
-                toolStripMenuItem3.Text = app.GameName;
-                toolStripMenuItem3.Tag = app.Tag;
-                toolStripMenuItem3.Image = imgList.Images[app.GetIconHash()];
-                toolStripMenuItem3.Click += new EventHandler(NotifyMenu_Click);
-                toolStripMenuItem.DropDownItems.Add(toolStripMenuItem3);
-                ResortToolStripItemCollection(toolStripMenuItem.DropDownItems);
+                ToolStripMenuItem mnuItemContent = new ToolStripMenuItem();
+                mnuItemContent.Name = app.GameName;
+                mnuItemContent.Text = app.GameName;
+                mnuItemContent.Tag = app.Tag;
+                mnuItemContent.Image = imgList.Images[app.GetIconHash()];
+                mnuItemContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+                mnuTrayContent.DropDownItems.Add(mnuItemContent);
+
+                ResortToolStripItemCollection(mnuTrayContent.DropDownItems);
             }
             else
             {
-                ToolStripItem[] array3 = mnuTrayMenu.Items.Find("Steam", true);
-                ToolStripMenuItem toolStripMenuItem;
-                if (array3.Length < 1)
+                if (app.AppId == -1) //non steam
                 {
-                    toolStripMenuItem = new ToolStripMenuItem();
-                    toolStripMenuItem.Name = "Steam";
-                    toolStripMenuItem.Text = "Steam";
-                    mnuTrayMenu.Items.Add(toolStripMenuItem);
+                    ToolStripItem[] mnuItmNonSteam = mnuTrayMenu.Items.Find("Non-Steam", true);
+                    if (mnuItmNonSteam.Length < 1)
+                    {
+                        mnuTrayContent = new ToolStripMenuItem();
+                        mnuTrayContent.Name = "Non-Steam";
+                        mnuTrayContent.Text = "Non-Steam";
+                        mnuTrayMenu.Items.Add(mnuTrayContent);
+                        mnuTrayMenu.Refresh();
+                    }
+                    else
+                    {
+                        mnuTrayContent = (ToolStripMenuItem)mnuItmNonSteam[0];
+                    }
+
+                    ToolStripMenuItem mnuItemContent = new ToolStripMenuItem();
+                    mnuItemContent.Name = app.GameName;
+                    mnuItemContent.Text = app.GameName;
+                    mnuItemContent.Tag = app.Tag;
+                    mnuItemContent.Image = imgList.Images[app.GetIconHash()];
+                    mnuItemContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+                    mnuTrayContent.DropDownItems.Add(mnuItemContent);
+
+                    ResortToolStripItemCollection(mnuTrayContent.DropDownItems);
                 }
-                else
+                else //steam
                 {
-                    toolStripMenuItem = (ToolStripMenuItem)array3[0];
+                    ToolStripItem[] mnuItmSteam = mnuTrayMenu.Items.Find("Steam", true);
+                    if (mnuItmSteam.Length < 1)
+                    {
+                        mnuTrayContent = new ToolStripMenuItem();
+                        mnuTrayContent.Name = "Steam";
+                        mnuTrayContent.Text = "Steam";
+                        mnuTrayMenu.Items.Add(mnuTrayContent);
+                    }
+                    else
+                    {
+                        mnuTrayContent = (ToolStripMenuItem)mnuItmSteam[0];
+                    }
+
+                    ToolStripMenuItem mnuItemContent = new ToolStripMenuItem();
+                    mnuItemContent.Name = app.GameName;
+                    mnuItemContent.Text = app.GameName;
+                    mnuItemContent.Tag = app.Tag;
+                    mnuItemContent.Image = imgList.Images[app.GetIconHash()];
+                    mnuItemContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+                    mnuTrayContent.DropDownItems.Add(mnuItemContent);
+
+                    ResortToolStripItemCollection(mnuTrayContent.DropDownItems);
                 }
-                ToolStripMenuItem toolStripMenuItem4 = new ToolStripMenuItem();
-                toolStripMenuItem4.Name = app.GameName;
-                toolStripMenuItem4.Text = app.GameName;
-                toolStripMenuItem4.Tag = app.Tag;
-                toolStripMenuItem4.Image = imgList.Images[app.GetIconHash()];
-                toolStripMenuItem4.Click += new EventHandler(NotifyMenu_Click);
-                toolStripMenuItem.DropDownItems.Add(toolStripMenuItem4);
-                ResortToolStripItemCollection(toolStripMenuItem.DropDownItems);
             }
-            if (!MenuFirstInit)
-            {
-                SortTrayMenu();
-            }
+
+            if (!MenuFirstInit) SortTrayMenu();
         }
 
         private void ResortToolStripItemCollection(ToolStripItemCollection coll)
         {
-            if (MenuFirstInit)
-            {
-                return;
-            }
-            ArrayList expr_0F = new ArrayList(coll);
-            expr_0F.Sort(new FrmMain.ToolStripItemComparer());
+            if (MenuFirstInit) return;
+
+            System.Collections.ArrayList oAList = new System.Collections.ArrayList(coll);
+            oAList.Sort(new ToolStripItemComparer());
             coll.Clear();
-            foreach (ToolStripItem value in expr_0F)
+
+            foreach (ToolStripItem oItem in oAList)
             {
-                coll.Add(value);
+                coll.Add(oItem);
+            }
+        }
+
+        public class ToolStripItemComparer : System.Collections.IComparer
+        {
+            public int Compare(object x, object y)
+            {
+                ToolStripItem oItem1 = (ToolStripItem)x;
+                ToolStripItem oItem2 = (ToolStripItem)y;
+                return string.Compare(oItem1.Text, oItem2.Text, true);
             }
         }
 
         private void SortTrayMenu()
         {
-            ArrayList arrayList = new ArrayList();
-            ToolStripItem toolStripItem = null;
-            ToolStripItem toolStripItem2 = null;
-            foreach (ToolStripItem toolStripItem3 in mnuTrayMenu.Items)
+            System.Collections.ArrayList mnuList = new System.Collections.ArrayList();
+            ToolStripItem steamMenu = null, nonSteamMenu = null;
+
+            foreach (ToolStripItem mnu in mnuTrayMenu.Items)
             {
-                if (toolStripItem3.GetType() == typeof(ToolStripSeparator))
+                if (mnu.GetType() == typeof(ToolStripSeparator))
                 {
-                    arrayList.Add(toolStripItem3);
+                    mnuList.Add(mnu);
+                    continue;
                 }
-                else
+
+                switch (mnu.Text)
                 {
-                    string text = toolStripItem3.Text;
-                    if (!(text == "Steam"))
-                    {
-                        if (!(text == "Non-Steam"))
-                        {
-                            if (text == "About" || text == "Exit" || text == "Settings" || text == "Open")
-                            {
-                                arrayList.Add(toolStripItem3);
-                            }
-                        }
-                        else
-                        {
-                            toolStripItem2 = toolStripItem3;
-                        }
-                    }
-                    else
-                    {
-                        toolStripItem = toolStripItem3;
-                    }
+                    case "Steam":
+                        steamMenu = mnu;
+                        break;
+                    case "Non-Steam":
+                        nonSteamMenu = mnu;
+                        break;
+                    case "About":
+                    case "Exit":
+                    case "Settings":
+                    case "Open":
+                        mnuList.Add(mnu);
+                        break;
                 }
             }
-            if (toolStripItem != null)
+
+            // Add Steam and Non-Steam first
+            if (steamMenu != null)
+                mnuTrayMenu.Items.Add(steamMenu);
+            if (nonSteamMenu != null)
+                mnuTrayMenu.Items.Add(nonSteamMenu);
+
+            foreach (ToolStripItem mnu in mnuList)
             {
-                mnuTrayMenu.Items.Add(toolStripItem);
-            }
-            if (toolStripItem2 != null)
-            {
-                mnuTrayMenu.Items.Add(toolStripItem2);
-            }
-            foreach (ToolStripItem value in arrayList)
-            {
-                mnuTrayMenu.Items.Add(value);
+                mnuTrayMenu.Items.Add(mnu);
             }
         }
 
         private void EditTrayLaunchMenu(CApp app, bool backgroundLoadingOnly)
         {
-            ToolStripMenuItem toolStripMenuItem = FindMenuByTag(app.Tag, mnuTrayMenu.Items);
-            if (toolStripMenuItem == null)
-            {
+            var mnu = FindMenuByTag(app.Tag, mnuTrayMenu.Items);
+            if (mnu == null)
                 return;
-            }
+
             if (imgList.Images[app.GetIconHash()] != null)
+                mnu.Image = imgList.Images[app.GetIconHash()];
+
+            // The worker thread only loads background icon.
+            if (backgroundLoadingOnly) return;
+
+            mnu.Text = app.GameName;
+            mnu.Name = app.GameName;
+
+            if (mnu.OwnerItem != null)
             {
-                toolStripMenuItem.Image = imgList.Images[app.GetIconHash()];
+                ToolStripMenuItem parentMenu = (ToolStripMenuItem)mnu.OwnerItem;
+                parentMenu.DropDownItems.Remove(mnu);
+
+                if (parentMenu.DropDownItems.Count < 1)
+                    mnuTrayMenu.Items.Remove(parentMenu);
             }
-            if (backgroundLoadingOnly)
-            {
-                return;
-            }
-            toolStripMenuItem.Text = app.GameName;
-            toolStripMenuItem.Name = app.GameName;
-            if (toolStripMenuItem.OwnerItem != null)
-            {
-                ToolStripMenuItem toolStripMenuItem2 = (ToolStripMenuItem)toolStripMenuItem.OwnerItem;
-                toolStripMenuItem2.DropDownItems.Remove(toolStripMenuItem);
-                if (toolStripMenuItem2.DropDownItems.Count < 1)
-                {
-                    mnuTrayMenu.Items.Remove(toolStripMenuItem2);
-                }
-            }
-            ToolStripMenuItem toolStripMenuItem3;
+
+            // TODO: Duplicates code from AddTrayLaunchMenu
+            ToolStripMenuItem mnuTrayContent;
             if (app.Category != null && app.Category != "")
             {
-                ToolStripItem[] array = mnuTrayMenu.Items.Find(app.Category, true);
-                if (array.Length < 1)
+                ToolStripItem[] mnuItmCategory = mnuTrayMenu.Items.Find(app.Category, true);
+
+                if (mnuItmCategory.Length < 1)
                 {
-                    toolStripMenuItem3 = new ToolStripMenuItem();
-                    toolStripMenuItem3.Name = app.Category;
-                    toolStripMenuItem3.Text = app.Category;
-                    mnuTrayMenu.Items.Add(toolStripMenuItem3);
+                    mnuTrayContent = new ToolStripMenuItem();
+                    mnuTrayContent.Name = app.Category;
+                    mnuTrayContent.Text = app.Category;
+                    mnuTrayMenu.Items.Add(mnuTrayContent);
                 }
                 else
                 {
-                    toolStripMenuItem3 = (ToolStripMenuItem)array[0];
-                }
-            }
-            else if (app.AppId == -1)
-            {
-                ToolStripItem[] array2 = mnuTrayMenu.Items.Find("Non-Steam", true);
-                if (array2.Length < 1)
-                {
-                    toolStripMenuItem3 = new ToolStripMenuItem();
-                    toolStripMenuItem3.Name = "Non-Steam";
-                    toolStripMenuItem3.Text = "Non-Steam";
-                    mnuTrayMenu.Items.Add(toolStripMenuItem3);
-                    mnuTrayMenu.Refresh();
-                }
-                else
-                {
-                    toolStripMenuItem3 = (ToolStripMenuItem)array2[0];
+                    mnuTrayContent = (ToolStripMenuItem)mnuItmCategory[0];
                 }
             }
             else
             {
-                ToolStripItem[] array3 = mnuTrayMenu.Items.Find("Steam", true);
-                if (array3.Length < 1)
+                if (app.AppId == -1) //non steam
                 {
-                    toolStripMenuItem3 = new ToolStripMenuItem();
-                    toolStripMenuItem3.Name = "Steam";
-                    toolStripMenuItem3.Text = "Steam";
-                    mnuTrayMenu.Items.Add(toolStripMenuItem3);
+                    ToolStripItem[] mnuItmNonSteam = mnuTrayMenu.Items.Find("Non-Steam", true);
+                    if (mnuItmNonSteam.Length < 1)
+                    {
+                        mnuTrayContent = new ToolStripMenuItem();
+                        mnuTrayContent.Name = "Non-Steam";
+                        mnuTrayContent.Text = "Non-Steam";
+                        mnuTrayMenu.Items.Add(mnuTrayContent);
+                        mnuTrayMenu.Refresh();
+                    }
+                    else
+                    {
+                        mnuTrayContent = (ToolStripMenuItem)mnuItmNonSteam[0];
+                    }
                 }
-                else
+                else //steam
                 {
-                    toolStripMenuItem3 = (ToolStripMenuItem)array3[0];
+                    ToolStripItem[] mnuItmSteam = mnuTrayMenu.Items.Find("Steam", true);
+                    if (mnuItmSteam.Length < 1)
+                    {
+                        mnuTrayContent = new ToolStripMenuItem();
+                        mnuTrayContent.Name = "Steam";
+                        mnuTrayContent.Text = "Steam";
+                        mnuTrayMenu.Items.Add(mnuTrayContent);
+                    }
+                    else
+                    {
+                        mnuTrayContent = (ToolStripMenuItem)mnuItmSteam[0];
+                    }
                 }
             }
-            if (toolStripMenuItem3 != null)
-            {
-                toolStripMenuItem3.DropDownItems.Add(toolStripMenuItem);
-            }
-            if (toolStripMenuItem.OwnerItem != null)
-            {
-                ResortToolStripItemCollection(((ToolStripMenuItem)toolStripMenuItem.OwnerItem).DropDownItems);
-            }
+
+            if (mnuTrayContent != null)
+                mnuTrayContent.DropDownItems.Add(mnu);
+
+            if (mnu.OwnerItem != null)
+                ResortToolStripItemCollection(((ToolStripMenuItem)mnu.OwnerItem).DropDownItems);
+
             SortTrayMenu();
         }
 
-        private void DeleteTrayLaunchMenu(object tag)
+        private void DeleteTrayLaunchMenu(Object tag)
         {
-            ToolStripItem toolStripItem = FindMenuByTag(tag, mnuTrayMenu.Items);
-            if (toolStripItem == null)
-            {
+            ToolStripItem mnuItem = FindMenuByTag(tag, mnuTrayMenu.Items);
+            if (mnuItem == null)
                 return;
-            }
-            ToolStripItem ownerItem = toolStripItem.OwnerItem;
-            if (ownerItem == null)
+
+            var parentItem = mnuItem.OwnerItem;
+
+            if (parentItem == null)
             {
-                mnuTrayMenu.Items.Remove(toolStripItem);
-                return;
+                mnuTrayMenu.Items.Remove(mnuItem);
             }
-            ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem)ownerItem;
-            toolStripMenuItem.DropDownItems.Remove(toolStripItem);
-            if (toolStripMenuItem.DropDownItems.Count < 1)
+            else
             {
-                mnuTrayMenu.Items.Remove(toolStripMenuItem);
+                ToolStripMenuItem parentMenu = (ToolStripMenuItem)parentItem;
+                parentMenu.DropDownItems.Remove(mnuItem);
+                if (parentMenu.DropDownItems.Count < 1)
+                    mnuTrayMenu.Items.Remove(parentMenu);
             }
         }
 
         private void PopulateTrayLaunchMenu()
         {
             mnuTrayMenu.Items.Add("-");
-            ToolStripMenuItem toolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem.Text = "Open";
-            toolStripMenuItem.Click += new EventHandler(NotifyMenu_Click);
-            mnuTrayMenu.Items.Add(toolStripMenuItem);
-            toolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem.Text = "Settings";
-            toolStripMenuItem.Click += new EventHandler(NotifyMenu_Click);
-            mnuTrayMenu.Items.Add(toolStripMenuItem);
+
+            ToolStripMenuItem mnuTrayContent = new ToolStripMenuItem();
+            mnuTrayContent.Text = "Open";
+            mnuTrayContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+            mnuTrayMenu.Items.Add(mnuTrayContent);
+
+            mnuTrayContent = new ToolStripMenuItem();
+            mnuTrayContent.Text = "Settings";
+            mnuTrayContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+            mnuTrayMenu.Items.Add(mnuTrayContent);
+
             mnuTrayMenu.Items.Add("-");
-            toolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem.Text = "About";
-            toolStripMenuItem.Click += new EventHandler(NotifyMenu_Click);
-            mnuTrayMenu.Items.Add(toolStripMenuItem);
+            mnuTrayContent = new ToolStripMenuItem();
+            mnuTrayContent.Text = "About";
+            mnuTrayContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+            mnuTrayMenu.Items.Add(mnuTrayContent);
+
             mnuTrayMenu.Items.Add("-");
-            toolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem.Text = "Exit";
-            toolStripMenuItem.Click += new EventHandler(NotifyMenu_Click);
-            mnuTrayMenu.Items.Add(toolStripMenuItem);
+
+            mnuTrayContent = new ToolStripMenuItem();
+            mnuTrayContent.Text = "Exit";
+            mnuTrayContent.Click += new System.EventHandler(this.NotifyMenu_Click);
+            mnuTrayMenu.Items.Add(mnuTrayContent);
+
             notifyIcon1.ContextMenuStrip = mnuTrayMenu;
         }
 
-        private ToolStripMenuItem FindMenuByTag(object tag, ToolStripItemCollection menuItems)
+        private ToolStripMenuItem FindMenuByTag(Object tag, ToolStripItemCollection menuItems)
         {
-            foreach (ToolStripItem toolStripItem in menuItems)
+            foreach (ToolStripItem mnu in menuItems)
             {
-                if (toolStripItem.GetType() == typeof(ToolStripMenuItem))
+                if (mnu.GetType() == typeof(ToolStripMenuItem))
                 {
-                    ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem)toolStripItem;
-                    if (toolStripMenuItem.Tag != null && toolStripMenuItem.Tag == tag)
+                    ToolStripMenuItem mnuItem = (ToolStripMenuItem)mnu;
+
+                    if (mnuItem.Tag != null && mnuItem.Tag == tag)
                     {
-                        ToolStripMenuItem result = toolStripMenuItem;
-                        return result;
+                        return mnuItem;
                     }
-                    if (toolStripMenuItem.DropDownItems.Count > 0)
+
+                    if (mnuItem.DropDownItems.Count > 0)
                     {
-                        ToolStripMenuItem toolStripMenuItem2 = FindMenuByTag(tag, toolStripMenuItem.DropDownItems);
-                        if (toolStripMenuItem2 != null)
-                        {
-                            ToolStripMenuItem result = toolStripMenuItem2;
-                            return result;
-                        }
+                        ToolStripMenuItem childMenu = FindMenuByTag(tag, mnuItem.DropDownItems);
+                        if (childMenu != null)
+                            return childMenu;
                     }
                 }
             }
+
             return null;
         }
 
@@ -1552,14 +1591,12 @@ namespace SSELauncher
 
         private string GetAppStoragePath(CApp app)
         {
-            var path = String.Empty;
-
             bool storageOnAppdata = (app.StorageOnAppdata == -1) ? Conf.StorageOnAppdata : Convert.ToBoolean(app.StorageOnAppdata);
             bool separateStorageByName = (app.SeparateStorageByName == -1) ? Conf.SeparateStorageByName : Convert.ToBoolean(app.SeparateStorageByName);
 
             var basePath = storageOnAppdata ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SmartSteamEmu");
 
-            path = Path.Combine(basePath, "SmartSteamEmu");
+            var path = Path.Combine(basePath, "SmartSteamEmu");
 
             if (separateStorageByName)
             {
@@ -1626,3 +1663,4 @@ namespace SSELauncher
         }
     }
 }
+
