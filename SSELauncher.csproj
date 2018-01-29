@@ -91,6 +91,9 @@
     <Compile Include="SSELauncher\Forms\FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="SSELauncher\Forms\FrmMain.Designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </Compile>
     <Compile Include="SSELauncher\Forms\FrmSettings.cs">
       <SubType>Form</SubType>
     </Compile>
