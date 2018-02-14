@@ -710,10 +710,17 @@ namespace SSELauncher
             var pathList = new List<string>();
 
             var searchPaths = new List<string>(new string[] {
-                "bin", "binaries",
-                "binaries\\Win32", "binaries\\Win64",
-                "..\\bin", "..\\binaries",
-                "..\\binaries\\Win32", "..\\binaries\\Win64",
+                "bin",
+                "binaries",
+                @"binaries\Win32",
+                @"binaries\Win64",
+                @"Bin\Win64Shared",
+
+                @"..\bin",
+                @"..\binaries",
+                @"..\binaries\Win32",
+                @"..\binaries\Win64",
+                @"..\Win64Shared",
             });
 
             if (cApp.Path != null)
@@ -730,7 +737,7 @@ namespace SSELauncher
 
 			if (cApp.StartIn != null)
 			{
-                var basePath = Path.GetDirectoryName(CApp.GetAbsolutePath(cApp.Path));
+                var basePath = Path.GetDirectoryName(CApp.GetAbsolutePath(cApp.StartIn));
 
                 pathList.Add(basePath);
 
