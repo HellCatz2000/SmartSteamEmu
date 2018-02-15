@@ -83,8 +83,8 @@
             this.typeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.categoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pbDrop = new System.Windows.Forms.PictureBox();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.pbDrop = new System.Windows.Forms.PictureBox();
             this.menuStrip.SuspendLayout();
             this.ctxMenuStrip.SuspendLayout();
             this.ctxMenuViewStrip.SuspendLayout();
@@ -225,7 +225,7 @@
             this.toolStripMenuItem7,
             this.editToolStripMenuItem});
             this.ctxMenuStrip.Name = "ctxMenuStrip";
-            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 170);
+            this.ctxMenuStrip.Size = new System.Drawing.Size(245, 220);
             // 
             // launchToolStripMenuItem
             // 
@@ -503,6 +503,11 @@
             this.refreshToolStripMenuItem.Text = "R&efresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Visible = true;
+            this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
+            // 
             // pbDrop
             // 
             this.pbDrop.BackColor = System.Drawing.Color.White;
@@ -515,11 +520,6 @@
             this.pbDrop.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbDrop.TabIndex = 2;
             this.pbDrop.TabStop = false;
-            // 
-            // notifyIcon1
-            // 
-            this.notifyIcon1.Visible = true;
-            this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
             // 
             // FrmMain
             // 
@@ -534,7 +534,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MinimumSize = new System.Drawing.Size(339, 414);
             this.Name = "FrmMain";
-            this.Text = "SmartSteamEmu Launcher";
+            this.Text = "SmartSteamEmu Comfy Launcher";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_Closing);
             this.Load += new System.EventHandler(this.FrmMain_Load);
             this.Resize += new System.EventHandler(this.FrmMain_Resize);
