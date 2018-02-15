@@ -10,15 +10,13 @@ namespace SSELauncher
 {
 	public partial class FrmSettings : Form
 	{
-		private CConfig m_Conf;
+        CConfig m_Conf;
+        string m_TempAvatarPath;
 
-		private string m_TempAvatarPath;
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        static extern uint GetPrivateProfileSectionNamesW(IntPtr lpszReturnBuffer, uint nSize, string lpFileName);
 
-
-		[DllImport("kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-		private static extern uint GetPrivateProfileSectionNamesW(IntPtr lpszReturnBuffer, uint nSize, string lpFileName);
-
-		public FrmSettings()
+        public FrmSettings()
 		{
             InitializeComponent();
 		}
@@ -26,9 +24,13 @@ namespace SSELauncher
 		public void SetConfig(CConfig config)
 		{
             m_Conf = config;
+
             RepopulateLanguage();
+
+            // Basic Settings
+
             cmbEmuSteamId.SelectedIndex = -1;
-            cmbEmuSteamId.Text = (string.Equals(config.SteamIdGeneration, "Manual", StringComparison.OrdinalIgnoreCase) ? config.ManualSteamId.ToString() : config.SteamIdGeneration);
+            cmbEmuSteamId.Text = (String.Equals(config.SteamIdGeneration, "Manual", StringComparison.OrdinalIgnoreCase) ? config.ManualSteamId.ToString() : config.SteamIdGeneration);
             cmbEmuPersonaName.SelectedIndex = -1;
             cmbEmuPersonaName.Text = config.PersonaName;
             cmbEmuQuickJoin.SelectedIndex = -1;
@@ -42,11 +44,12 @@ namespace SSELauncher
             cmbOverlayLang.Text = m_Conf.OverlayLanguage;
             cmbOverlayScreenshot.SelectedIndex = -1;
             cmbOverlayScreenshot.Text = m_Conf.OverlayScreenshotHotkey;
-			try
-			{
+
+            try
+            {
 				if (config.AvatarPath == "avatar.png")
 				{
-                    pbAvatar.Image = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SmartSteamEmu\\SmartSteamEmu\\Common\\" + config.AvatarPath));
+                    pbAvatar.Image = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"SmartSteamEmu\SmartSteamEmu\Common\" + config.AvatarPath));
 				}
 				else
 				{
@@ -56,6 +59,9 @@ namespace SSELauncher
 			catch
 			{
 			}
+
+            // Advanced Settings
+
             cmbAutoJoinInvite.Text = config.AutomaticallyJoinInvite.ToString();
             cmbStorageOnAppData.Text = config.StorageOnAppdata.ToString();
             cmbSeparateStorageByName.Text = config.SeparateStorageByName.ToString();
@@ -68,77 +74,95 @@ namespace SSELauncher
             cmbEnableVR.Text = config.EnableVR.ToString();
             cmbOffline.Text = config.Offline.ToString();
             txtOnlineKey.Text = config.OnlineKey;
-			foreach (string current in config.MasterServerAddress)
-			{
-                lstMasterServer.Items.Add(current);
-			}
+            foreach (string ipport in config.MasterServerAddress)
+            {
+                lstMasterServer.Items.Add(ipport);
+            }
+
+            // Debugging
+
             cmbEnableLog.Text = config.EnableLog.ToString();
             chkCleanLog.Checked = config.CleanLog;
+
+            // Networking
 
             numNetListenPort.Value = config.ListenPort;
             numNetMaxPort.Value = config.MaximumPort;
             numNetDiscoveryInterval.Value = config.DiscoveryInterval;
             numNetMaxConn.Value = config.MaximumConnection;
-			foreach (string current2 in config.BroadcastAddress)
-			{
-                lstNetBroadcast.Items.Add(current2);
-			}
+            foreach (string addr in config.BroadcastAddress)
+            {
+                lstNetBroadcast.Items.Add(addr);
+            }
+
+            // Player Management
+
             chkAllowAnyToConnect.Checked = config.AllowAnyoneConnect;
             txtAdminPass.Text = config.AdminPass;
-			foreach (string current3 in config.BanList)
-			{
-                lstBan.Items.Add(current3);
-			}
-		}
+            foreach (string steamid in config.BanList)
+            {
+                lstBan.Items.Add(steamid);
+            }
+        }
 
 		private void RepopulateLanguage()
 		{
-			string lpFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SmartSteamEmu\\SmartSteamEmu\\Plugins\\SSEOverlay\\Language.ini");
-			IntPtr intPtr = Marshal.AllocCoTaskMem(65534);
-			uint privateProfileSectionNamesW = FrmSettings.GetPrivateProfileSectionNamesW(intPtr, 32767u, lpFileName);
-			if (privateProfileSectionNamesW == 0u || privateProfileSectionNamesW == 32765u)
-			{
-				Marshal.FreeCoTaskMem(intPtr);
-				return;
-			}
-			string text = Marshal.PtrToStringUni(intPtr, (int)privateProfileSectionNamesW).ToString();
-			Marshal.FreeCoTaskMem(intPtr);
-			string[] array = text.Substring(0, text.Length - 1).Split(new char[1]);
-			if (array.Count<string>() > 0)
-			{
+            string AppPath = AppDomain.CurrentDomain.BaseDirectory;
+            string langFilePath = Path.Combine(AppPath, @"SmartSteamEmu\SmartSteamEmu\Plugins\SSEOverlay\Language.ini");
+
+            const uint MAX_BUFFER = 32767;
+            IntPtr pReturnedString = Marshal.AllocCoTaskMem((int)MAX_BUFFER * 2);
+            uint bytesReturned = GetPrivateProfileSectionNamesW(pReturnedString, MAX_BUFFER, langFilePath);
+            if (bytesReturned == 0 || bytesReturned == MAX_BUFFER - 2)
+            {
+                Marshal.FreeCoTaskMem(pReturnedString);
+                return;
+            }
+
+            string local = Marshal.PtrToStringUni(pReturnedString, (int)bytesReturned).ToString();
+            Marshal.FreeCoTaskMem(pReturnedString);
+
+            string[] langList = local.Substring(0, local.Length - 1).Split('\0');
+            if (langList.Count() > 0)
+            {
                 cmbOverlayLang.Items.Clear();
                 cmbOverlayLang.Items.Add("");
                 cmbOverlayLang.Items.Add("English");
-				string[] array2 = array;
-				for (int i = 0; i < array2.Length; i++)
-				{
-					string text2 = array2[i];
-					if (!text2.Equals("English", StringComparison.OrdinalIgnoreCase))
-					{
-                        cmbOverlayLang.Items.Add(text2);
-					}
-				}
-			}
-		}
+                foreach (string s in langList)
+                {
+                    if (!s.Equals("English", StringComparison.OrdinalIgnoreCase))
+                    {
+                        cmbOverlayLang.Items.Add(s);
+                    }
+                }
+            }
+        }
 
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			if (string.Equals(cmbEmuSteamId.Text, "Static", StringComparison.OrdinalIgnoreCase) || string.Equals(cmbEmuSteamId.Text, "Random", StringComparison.OrdinalIgnoreCase) || string.Equals(cmbEmuSteamId.Text, "PersonaName", StringComparison.OrdinalIgnoreCase) || string.Equals(cmbEmuSteamId.Text, "ip", StringComparison.OrdinalIgnoreCase) || string.Equals(cmbEmuSteamId.Text, "GenerateRandom", StringComparison.OrdinalIgnoreCase))
-			{
+            // Basic Settings
+
+            if (String.Equals(cmbEmuSteamId.Text, "Static", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(cmbEmuSteamId.Text, "Random", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(cmbEmuSteamId.Text, "PersonaName", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(cmbEmuSteamId.Text, "ip", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(cmbEmuSteamId.Text, "GenerateRandom", StringComparison.OrdinalIgnoreCase))
+            {
                 m_Conf.SteamIdGeneration = cmbEmuSteamId.Text;
-			}
-			else
-			{
-				try
-				{
+            }
+            else
+            {
+                try
+                {
                     m_Conf.ManualSteamId = Convert.ToInt64(cmbEmuSteamId.Text);
                     m_Conf.SteamIdGeneration = "Manual";
-				}
-				catch
-				{
-					MessageBox.Show("Invalid steam id!", "Invalid input");
-				}
-			}
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid steam id!", "Invalid input");
+                }
+            }
+
             m_Conf.PersonaName = cmbEmuPersonaName.Text;
             m_Conf.AvatarPath = CApp.MakeRelativePath(m_TempAvatarPath, false);
             m_Conf.QuickJoinHotkey = cmbEmuQuickJoin.Text;
@@ -149,6 +173,9 @@ namespace SSELauncher
             m_Conf.EnableOnlinePlay = Convert.ToBoolean(cmbOnlinePlay.Text);
             m_Conf.OverlayLanguage = cmbOverlayLang.Text;
             m_Conf.OverlayScreenshotHotkey = cmbOverlayScreenshot.Text;
+
+            // Advanced Setting
+
             m_Conf.AutomaticallyJoinInvite = Convert.ToBoolean(cmbAutoJoinInvite.Text);
             m_Conf.StorageOnAppdata = Convert.ToBoolean(cmbStorageOnAppData.Text);
             m_Conf.SeparateStorageByName = Convert.ToBoolean(cmbSeparateStorageByName.Text);
@@ -160,32 +187,41 @@ namespace SSELauncher
             m_Conf.EnableLobbyFilter = Convert.ToBoolean(cmbEnableLobbyFilter.Text);
             m_Conf.EnableVR = Convert.ToBoolean(cmbEnableVR.Text);
             m_Conf.Offline = Convert.ToBoolean(cmbOffline.Text);
-            m_Conf.OnlineKey = (string.IsNullOrWhiteSpace(txtOnlineKey.Text) ? null : txtOnlineKey.Text);
+            m_Conf.OnlineKey = (String.IsNullOrWhiteSpace(txtOnlineKey.Text) ? null : txtOnlineKey.Text);
             m_Conf.MasterServerAddress.Clear();
-			foreach (string item in lstMasterServer.Items)
-			{
-                m_Conf.MasterServerAddress.Add(item);
-			}
+            foreach (string ipport in lstMasterServer.Items)
+            {
+                m_Conf.MasterServerAddress.Add(ipport);
+            }
+
+            // Debugging
+
             m_Conf.EnableLog = Convert.ToBoolean(cmbEnableLog.Text);
             m_Conf.CleanLog = chkCleanLog.Checked;
+
+            // Network Setting
+
             m_Conf.ListenPort = Convert.ToInt32(numNetListenPort.Value);
             m_Conf.MaximumPort = Convert.ToInt32(numNetMaxPort.Value);
             m_Conf.DiscoveryInterval = Convert.ToInt32(numNetDiscoveryInterval.Value);
             m_Conf.MaximumConnection = Convert.ToInt32(numNetMaxConn.Value);
             m_Conf.BroadcastAddress.Clear();
-			foreach (string item2 in lstNetBroadcast.Items)
-			{
-                m_Conf.BroadcastAddress.Add(item2);
-			}
+            foreach (string address in lstNetBroadcast.Items)
+            {
+                m_Conf.BroadcastAddress.Add(address);
+            }
+
+            // Player Management
             m_Conf.AllowAnyoneConnect = chkAllowAnyToConnect.Checked;
             m_Conf.AdminPass = txtAdminPass.Text;
             m_Conf.BanList.Clear();
-			foreach (string item3 in lstBan.Items)
-			{
-                m_Conf.BanList.Add(item3);
-			}
-			base.DialogResult = DialogResult.OK;
-		}
+            foreach (string steamid in lstBan.Items)
+            {
+                m_Conf.BanList.Add(steamid);
+            }
+
+            this.DialogResult = DialogResult.OK;
+        }
 
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
@@ -237,6 +273,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstNetBroadcast.Items.Add(txtNetIp.Text);
             txtNetIp.Text = "";
 		}
@@ -247,6 +284,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstNetBroadcast.Items.RemoveAt(lstNetBroadcast.SelectedIndex);
 		}
 
@@ -256,6 +294,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstMasterServer.Items.Add(txtMasterServerIp.Text);
             txtMasterServerIp.Text = "";
 		}
@@ -266,6 +305,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstMasterServer.Items.RemoveAt(lstMasterServer.SelectedIndex);
 		}
 
@@ -275,6 +315,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstBan.Items.Add(txtBan.Text);
             txtBan.Text = "";
 		}
@@ -285,6 +326,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstBan.Items.RemoveAt(lstBan.SelectedIndex);
 		}
 
@@ -313,6 +355,7 @@ namespace SSELauncher
 			}
 
 			string text = listBox.Items[listBox.SelectedIndex].ToString();
+
 			if (text.Length > 0 && text[0] == ';')
 			{
 				text = text.Substring(1);
@@ -321,6 +364,7 @@ namespace SSELauncher
 			{
 				text = ";" + text;
 			}
+
 			listBox.Items[listBox.SelectedIndex] = text;
 			listBox.Refresh();
 		}
