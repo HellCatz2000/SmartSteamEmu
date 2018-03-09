@@ -765,13 +765,42 @@ namespace SSELauncher
 
         void AutoAppConfig(string path, CApp app)
         {
+            // Attempt to load app id from steam_appid.txt
+            if (app.AppId == 0)
+            {
+                var appidFile = Path.Combine(app.StartIn, "steam_appid.txt");
+
+                if (File.Exists(appidFile))
+                {
+                    try
+                    {
+                        var text = File.ReadAllText(appidFile);
+
+                        if (text.Length > 0)
+                        {
+                            if (Int32.TryParse(text, out int id))
+                            {
+                                app.AppId = id;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Don't care about errors
+                    }
+                }
+            }
+
             if (appinfoVDF == null)
             {
                 FrmAppSetting appSetting = new FrmAppSetting();
                 appSetting.CategoryList = AvailableCategories;
                 appSetting.SetEditApp(app, Conf);
+
                 DialogResult res = appSetting.ShowDialog();
+
                 appSetting.Dispose();
+
                 DoRefreshCategories(app);
 
                 if (res == DialogResult.OK)
@@ -780,6 +809,7 @@ namespace SSELauncher
                 }
 
                 m_AppList.Save();
+
                 return;
             }
 
