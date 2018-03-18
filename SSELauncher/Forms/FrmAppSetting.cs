@@ -862,6 +862,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             lstNetBroadcast.Items.RemoveAt(lstNetBroadcast.SelectedIndex);
 		}
 
@@ -1691,6 +1692,7 @@ namespace SSELauncher
             // 
             // btnAddDlc
             // 
+            this.btnAddDlc.Enabled = false;
             this.btnAddDlc.Location = new System.Drawing.Point(502, 48);
             this.btnAddDlc.Margin = new System.Windows.Forms.Padding(2);
             this.btnAddDlc.Name = "btnAddDlc";
@@ -1706,6 +1708,7 @@ namespace SSELauncher
             this.txtDlcName.Name = "txtDlcName";
             this.txtDlcName.Size = new System.Drawing.Size(250, 20);
             this.txtDlcName.TabIndex = 2;
+            this.txtDlcName.TextChanged += new System.EventHandler(this.ValidateDlcInput);
             // 
             // btnDelAllDlc
             // 
@@ -1734,6 +1737,7 @@ namespace SSELauncher
             this.txtDlcAppId.Name = "txtDlcAppId";
             this.txtDlcAppId.Size = new System.Drawing.Size(152, 20);
             this.txtDlcAppId.TabIndex = 1;
+            this.txtDlcAppId.TextChanged += new System.EventHandler(this.ValidateDlcInput);
             // 
             // label28
             // 
@@ -3035,6 +3039,18 @@ namespace SSELauncher
         {
             m_TempDlcList.Clear();
             lstDlc.Items.Clear();
+        }
+
+        private void ValidateDlcInput(object sender, EventArgs e)
+        {
+            if (Int32.TryParse(txtDlcAppId.Text, out _) && !String.IsNullOrWhiteSpace(txtDlcName.Text))
+            {
+                btnAddDlc.Enabled = true;
+            }
+            else
+            {
+                btnAddDlc.Enabled = false;
+            }
         }
     }
 }
