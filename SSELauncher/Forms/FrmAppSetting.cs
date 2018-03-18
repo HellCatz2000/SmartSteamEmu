@@ -1705,7 +1705,7 @@ namespace SSELauncher
             this.txtDlcName.Location = new System.Drawing.Point(247, 51);
             this.txtDlcName.Name = "txtDlcName";
             this.txtDlcName.Size = new System.Drawing.Size(250, 20);
-            this.txtDlcName.TabIndex = 12;
+            this.txtDlcName.TabIndex = 2;
             // 
             // btnDelAllDlc
             // 
