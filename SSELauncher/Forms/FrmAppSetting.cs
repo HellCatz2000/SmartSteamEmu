@@ -2643,7 +2643,7 @@ namespace SSELauncher
             // label43
             // 
             this.label43.AutoSize = true;
-            this.label43.Location = new System.Drawing.Point(271, 45);
+            this.label43.Location = new System.Drawing.Point(262, 45);
             this.label43.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label43.Name = "label43";
             this.label43.Size = new System.Drawing.Size(113, 13);
@@ -2726,7 +2726,7 @@ namespace SSELauncher
             // label41
             // 
             this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(271, 18);
+            this.label41.Location = new System.Drawing.Point(262, 18);
             this.label41.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label41.Name = "label41";
             this.label41.Size = new System.Drawing.Size(151, 13);
