@@ -158,8 +158,6 @@ namespace SSELauncher
 
 		private Label label29;
 
-		private ComboBox cmbDlcName;
-
 		private Button btnAddDlc;
 
 		private Button btnDelDlc;
@@ -265,6 +263,7 @@ namespace SSELauncher
         private ComboBox cmbExtLogging;
         private Button btnAddFromClipboard;
         private Button btnDelAllDlc;
+        private TextBox txtDlcName;
         private ToolStripMenuItem mnuToggle;
 
 		public FrmAppSetting()
@@ -868,18 +867,16 @@ namespace SSELauncher
 
 		private void btnAddDlc_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrEmpty(txtDlcAppId.Text) || string.IsNullOrWhiteSpace(txtDlcAppId.Text))
+			if (string.IsNullOrWhiteSpace(txtDlcAppId.Text) || string.IsNullOrWhiteSpace(txtDlcName.Text))
 			{
 				return;
 			}
-			if (string.IsNullOrEmpty(cmbDlcName.Text) || string.IsNullOrWhiteSpace(cmbDlcName.Text))
-			{
-				return;
-			}
-            m_TempDlcList.Add(new KVDlc<string, string>(txtDlcAppId.Text, cmbDlcName.Text, false));
-            lstDlc.Items.Add(txtDlcAppId.Text + " = " + cmbDlcName.Text);
+
+            m_TempDlcList.Add(new KVDlc<string, string>(txtDlcAppId.Text, txtDlcName.Text, false));
+            lstDlc.Items.Add(txtDlcAppId.Text + " = " + txtDlcName.Text);
+
             txtDlcAppId.Text = "";
-            cmbDlcName.Text = "";
+            txtDlcName.Text = "";
 		}
 
 		private void btnDelDlc_Click(object sender, EventArgs e)
@@ -888,6 +885,7 @@ namespace SSELauncher
 			{
 				return;
 			}
+
             m_TempDlcList.RemoveAt(lstDlc.SelectedIndex);
             lstDlc.Items.RemoveAt(lstDlc.SelectedIndex);
 		}
@@ -1240,15 +1238,15 @@ namespace SSELauncher
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnAddDlc = new System.Windows.Forms.Button();
+            this.txtDlcName = new System.Windows.Forms.TextBox();
             this.btnDelAllDlc = new System.Windows.Forms.Button();
+            this.label29 = new System.Windows.Forms.Label();
+            this.txtDlcAppId = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
             this.btnAddFromClipboard = new System.Windows.Forms.Button();
             this.chkDlcSubsDefault = new System.Windows.Forms.CheckBox();
             this.btnDelDlc = new System.Windows.Forms.Button();
-            this.btnAddDlc = new System.Windows.Forms.Button();
-            this.cmbDlcName = new System.Windows.Forms.ComboBox();
-            this.txtDlcAppId = new System.Windows.Forms.TextBox();
-            this.label29 = new System.Windows.Forms.Label();
-            this.label28 = new System.Windows.Forms.Label();
             this.lstDlc = new System.Windows.Forms.ListBox();
             this.dlcContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuToggle = new System.Windows.Forms.ToolStripMenuItem();
@@ -1672,15 +1670,15 @@ namespace SSELauncher
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btnAddDlc);
+            this.tabPage2.Controls.Add(this.txtDlcName);
             this.tabPage2.Controls.Add(this.btnDelAllDlc);
+            this.tabPage2.Controls.Add(this.label29);
+            this.tabPage2.Controls.Add(this.txtDlcAppId);
+            this.tabPage2.Controls.Add(this.label28);
             this.tabPage2.Controls.Add(this.btnAddFromClipboard);
             this.tabPage2.Controls.Add(this.chkDlcSubsDefault);
             this.tabPage2.Controls.Add(this.btnDelDlc);
-            this.tabPage2.Controls.Add(this.btnAddDlc);
-            this.tabPage2.Controls.Add(this.cmbDlcName);
-            this.tabPage2.Controls.Add(this.txtDlcAppId);
-            this.tabPage2.Controls.Add(this.label29);
-            this.tabPage2.Controls.Add(this.label28);
             this.tabPage2.Controls.Add(this.lstDlc);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(2);
@@ -1690,6 +1688,24 @@ namespace SSELauncher
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "DLC Manager";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // btnAddDlc
+            // 
+            this.btnAddDlc.Location = new System.Drawing.Point(502, 48);
+            this.btnAddDlc.Margin = new System.Windows.Forms.Padding(2);
+            this.btnAddDlc.Name = "btnAddDlc";
+            this.btnAddDlc.Size = new System.Drawing.Size(52, 24);
+            this.btnAddDlc.TabIndex = 3;
+            this.btnAddDlc.Text = "Add";
+            this.btnAddDlc.UseVisualStyleBackColor = true;
+            this.btnAddDlc.Click += new System.EventHandler(this.btnAddDlc_Click);
+            // 
+            // txtDlcName
+            // 
+            this.txtDlcName.Location = new System.Drawing.Point(247, 51);
+            this.txtDlcName.Name = "txtDlcName";
+            this.txtDlcName.Size = new System.Drawing.Size(250, 20);
+            this.txtDlcName.TabIndex = 12;
             // 
             // btnDelAllDlc
             // 
@@ -1701,13 +1717,41 @@ namespace SSELauncher
             this.btnDelAllDlc.UseVisualStyleBackColor = true;
             this.btnDelAllDlc.Click += new System.EventHandler(this.btnDelAllDlc_Click);
             // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(204, 54);
+            this.label29.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(38, 13);
+            this.label29.TabIndex = 8;
+            this.label29.Text = "Name:";
+            // 
+            // txtDlcAppId
+            // 
+            this.txtDlcAppId.Location = new System.Drawing.Point(35, 51);
+            this.txtDlcAppId.Margin = new System.Windows.Forms.Padding(2);
+            this.txtDlcAppId.Name = "txtDlcAppId";
+            this.txtDlcAppId.Size = new System.Drawing.Size(152, 20);
+            this.txtDlcAppId.TabIndex = 1;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(8, 54);
+            this.label28.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(21, 13);
+            this.label28.TabIndex = 8;
+            this.label28.Text = "ID:";
+            // 
             // btnAddFromClipboard
             // 
-            this.btnAddFromClipboard.Location = new System.Drawing.Point(447, 13);
+            this.btnAddFromClipboard.Location = new System.Drawing.Point(427, 13);
             this.btnAddFromClipboard.Name = "btnAddFromClipboard";
-            this.btnAddFromClipboard.Size = new System.Drawing.Size(107, 23);
+            this.btnAddFromClipboard.Size = new System.Drawing.Size(127, 23);
             this.btnAddFromClipboard.TabIndex = 9;
-            this.btnAddFromClipboard.Text = "Add from clipboard";
+            this.btnAddFromClipboard.Text = "Import from clipboard";
             this.toolTip1.SetToolTip(this.btnAddFromClipboard, "It expects a list of  dlcid = dlcname format separated by new line");
             this.btnAddFromClipboard.UseVisualStyleBackColor = true;
             this.btnAddFromClipboard.Click += new System.EventHandler(this.btnAddFromClipboard_Click);
@@ -1715,7 +1759,7 @@ namespace SSELauncher
             // chkDlcSubsDefault
             // 
             this.chkDlcSubsDefault.AutoSize = true;
-            this.chkDlcSubsDefault.Location = new System.Drawing.Point(11, 13);
+            this.chkDlcSubsDefault.Location = new System.Drawing.Point(11, 17);
             this.chkDlcSubsDefault.Margin = new System.Windows.Forms.Padding(2);
             this.chkDlcSubsDefault.Name = "chkDlcSubsDefault";
             this.chkDlcSubsDefault.Size = new System.Drawing.Size(176, 17);
@@ -1725,7 +1769,7 @@ namespace SSELauncher
             // 
             // btnDelDlc
             // 
-            this.btnDelDlc.Location = new System.Drawing.Point(502, 76);
+            this.btnDelDlc.Location = new System.Drawing.Point(503, 76);
             this.btnDelDlc.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelDlc.Name = "btnDelDlc";
             this.btnDelDlc.Size = new System.Drawing.Size(52, 24);
@@ -1733,59 +1777,6 @@ namespace SSELauncher
             this.btnDelDlc.Text = "Del";
             this.btnDelDlc.UseVisualStyleBackColor = true;
             this.btnDelDlc.Click += new System.EventHandler(this.btnDelDlc_Click);
-            // 
-            // btnAddDlc
-            // 
-            this.btnAddDlc.Location = new System.Drawing.Point(502, 47);
-            this.btnAddDlc.Margin = new System.Windows.Forms.Padding(2);
-            this.btnAddDlc.Name = "btnAddDlc";
-            this.btnAddDlc.Size = new System.Drawing.Size(52, 24);
-            this.btnAddDlc.TabIndex = 3;
-            this.btnAddDlc.Text = "Add";
-            this.btnAddDlc.UseVisualStyleBackColor = true;
-            this.btnAddDlc.Click += new System.EventHandler(this.btnAddDlc_Click);
-            // 
-            // cmbDlcName
-            // 
-            this.cmbDlcName.FormattingEnabled = true;
-            this.cmbDlcName.Items.AddRange(new object[] {
-            "1",
-            "0",
-            "Enter DLC Name Here"});
-            this.cmbDlcName.Location = new System.Drawing.Point(279, 50);
-            this.cmbDlcName.Margin = new System.Windows.Forms.Padding(2);
-            this.cmbDlcName.Name = "cmbDlcName";
-            this.cmbDlcName.Size = new System.Drawing.Size(219, 21);
-            this.cmbDlcName.TabIndex = 2;
-            // 
-            // txtDlcAppId
-            // 
-            this.txtDlcAppId.Location = new System.Drawing.Point(57, 50);
-            this.txtDlcAppId.Margin = new System.Windows.Forms.Padding(2);
-            this.txtDlcAppId.Name = "txtDlcAppId";
-            this.txtDlcAppId.Size = new System.Drawing.Size(152, 20);
-            this.txtDlcAppId.TabIndex = 1;
-            this.txtDlcAppId.TextChanged += new System.EventHandler(this.txtDlcAppId_TextChanged);
-            // 
-            // label29
-            // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(213, 53);
-            this.label29.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(62, 13);
-            this.label29.TabIndex = 8;
-            this.label29.Text = "DLC Name:";
-            // 
-            // label28
-            // 
-            this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(8, 53);
-            this.label28.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(45, 13);
-            this.label28.TabIndex = 8;
-            this.label28.Text = "DLC ID:";
             // 
             // lstDlc
             // 
@@ -2960,11 +2951,6 @@ namespace SSELauncher
             this.ResumeLayout(false);
 
 		}
-
-        private void txtDlcAppId_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void btnAddFromClipboard_Click(object sender, EventArgs e)
         {
