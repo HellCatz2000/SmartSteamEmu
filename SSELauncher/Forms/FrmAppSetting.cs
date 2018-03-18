@@ -1240,6 +1240,7 @@ namespace SSELauncher
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnEditDlc = new System.Windows.Forms.Button();
             this.btnAddDlc = new System.Windows.Forms.Button();
             this.txtDlcName = new System.Windows.Forms.TextBox();
             this.btnDelAllDlc = new System.Windows.Forms.Button();
@@ -1333,7 +1334,6 @@ namespace SSELauncher
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnCreateShortcut = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnEditDlc = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pb64)).BeginInit();
@@ -1693,6 +1693,17 @@ namespace SSELauncher
             this.tabPage2.Text = "DLC Manager";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // btnEditDlc
+            // 
+            this.btnEditDlc.Enabled = false;
+            this.btnEditDlc.Location = new System.Drawing.Point(502, 105);
+            this.btnEditDlc.Name = "btnEditDlc";
+            this.btnEditDlc.Size = new System.Drawing.Size(52, 23);
+            this.btnEditDlc.TabIndex = 12;
+            this.btnEditDlc.Text = "Edit";
+            this.btnEditDlc.UseVisualStyleBackColor = true;
+            this.btnEditDlc.Click += new System.EventHandler(this.btnEditDlc_Click);
+            // 
             // btnAddDlc
             // 
             this.btnAddDlc.Enabled = false;
@@ -1776,6 +1787,7 @@ namespace SSELauncher
             // 
             // btnDelDlc
             // 
+            this.btnDelDlc.Enabled = false;
             this.btnDelDlc.Location = new System.Drawing.Point(503, 76);
             this.btnDelDlc.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelDlc.Name = "btnDelDlc";
@@ -2919,17 +2931,6 @@ namespace SSELauncher
             this.toolTip1.InitialDelay = 500;
             this.toolTip1.ReshowDelay = 100;
             // 
-            // btnEditDlc
-            // 
-            this.btnEditDlc.Enabled = false;
-            this.btnEditDlc.Location = new System.Drawing.Point(502, 105);
-            this.btnEditDlc.Name = "btnEditDlc";
-            this.btnEditDlc.Size = new System.Drawing.Size(52, 23);
-            this.btnEditDlc.TabIndex = 12;
-            this.btnEditDlc.Text = "Edit";
-            this.btnEditDlc.UseVisualStyleBackColor = true;
-            this.btnEditDlc.Click += new System.EventHandler(this.btnEditDlc_Click);
-            // 
             // FrmAppSetting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -3056,6 +3057,7 @@ namespace SSELauncher
             lstDlc.Items.Clear();
 
             btnEditDlc.Enabled = false;
+            btnDelDlc.Enabled = btnEditDlc.Enabled;
         }
 
         private void ValidateDlcInput(object sender, EventArgs e)
@@ -3073,6 +3075,7 @@ namespace SSELauncher
         private void lstDlc_SelectedIndexChanged(object sender, EventArgs e)
         {
             btnEditDlc.Enabled = (lstDlc.SelectedIndex >= 0);
+            btnDelDlc.Enabled = btnEditDlc.Enabled;
         }
 
         private void btnEditDlc_Click(object sender, EventArgs e)
