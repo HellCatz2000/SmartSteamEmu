@@ -155,47 +155,43 @@ namespace SSELauncher
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
         }
 
-        async void lstApps_DragDrop(object sender, DragEventArgs e)
+        void lstApps_DragDrop(object sender, DragEventArgs e)
         {
-            await Task.Run(() =>
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
             {
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                foreach (string file in files)
+                CApp app = new CApp();
+
+                app.Path = CApp.MakeRelativePath(file);
+                app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                app.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(app.Path));
+
+                if (file.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
                 {
-                    CApp app = new CApp();
-
-                    app.Path = CApp.MakeRelativePath(file);
-                    app.GameName = Path.GetFileNameWithoutExtension(app.Path);
-                    app.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(app.Path));
-
-                    if (file.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+                    try
                     {
-                        try
+                        using (ShellLink link = new ShellLink(file))
                         {
-                            using (ShellLink link = new ShellLink(file))
-                            {
-                                app.Path = CApp.MakeRelativePath(link.Target);
-                                app.GameName = Path.GetFileNameWithoutExtension(app.Path);
-                                app.StartIn = CApp.MakeRelativePath(link.WorkingDirectory);
-                                app.CommandLine = link.Arguments;
-                            }
+                            app.Path = CApp.MakeRelativePath(link.Target);
+                            app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                            app.StartIn = CApp.MakeRelativePath(link.WorkingDirectory);
+                            app.CommandLine = link.Arguments;
                         }
-                        catch
-                        { }
                     }
-
-                    if (File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "bin\\launcher.dll")) ||
-                        File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hl.exe")) ||
-                        File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hlds.exe")) ||
-                        File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hltv.exe")))
-                    {
-                        app.CommandLine = "-steam";
-                    }
-
-                    AutoAppConfig(file, app);
+                    catch
+                    { }
                 }
+
+                if (File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "bin\\launcher.dll")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hl.exe")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hlds.exe")) ||
+                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hltv.exe")))
+                {
+                    app.CommandLine = "-steam";
+                }
+
+                AutoAppConfig(file, app);
             }
-            );
         }
 
         private void lstApps_OnItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
