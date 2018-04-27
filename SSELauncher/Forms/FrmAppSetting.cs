@@ -729,6 +729,9 @@ namespace SSELauncher
 
                 pathList.Add(basePath);
 
+                // Unity games
+                pathList.Add(Path.Combine(basePath, Path.GetFileNameWithoutExtension(cApp.Path) + @"_Data\Plugins"));
+
                 foreach (var path in searchPaths)
                 {
                     pathList.Add(Path.Combine(basePath, path));
@@ -757,10 +760,9 @@ namespace SSELauncher
                 if (!x64found)
                 {
                     x64found = VerifyDigitalSignature(Path.Combine(path, "steam_api64.dll"), out x64Verified);
-
                 }
 
-                if (x86found && x64found)
+                if (x86found || x64found)
                 {
                     break;
                 }
