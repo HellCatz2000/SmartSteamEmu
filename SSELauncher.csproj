@@ -104,6 +104,7 @@
     <Compile Include="SSELauncher\Forms\FrmSettings.Designer.cs">
       <DependentUpon>FrmSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="SSELauncher\Launcher.cs" />
     <Compile Include="SSELauncher\NativeMethods.cs" />
     <Compile Include="SSELauncher\Program.cs" />
     <Compile Include="vbAccelerator.Components.Shell\FileIcon.cs" />

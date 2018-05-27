@@ -62,7 +62,7 @@ namespace SSELauncher
                     args += " " + arg;
                 }
 
-                FrmMain.WriteIniAndLaunch(cApp, AppList.GetConfig(), args);
+                Launcher.WriteIniAndLaunch(cApp, AppList.GetConfig(), args);
 
                 return;
             }
