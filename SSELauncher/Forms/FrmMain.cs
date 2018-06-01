@@ -152,46 +152,65 @@ namespace SSELauncher
 
         void lstApps_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
         }
 
         void lstApps_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
+
+            Task.Factory.StartNew(() =>
             {
-                CApp app = new CApp();
-
-                app.Path = CApp.MakeRelativePath(file);
-                app.GameName = Path.GetFileNameWithoutExtension(app.Path);
-                app.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(app.Path));
-
-                if (file.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+                foreach (string file in files)
                 {
-                    try
+                    var app = new CApp();
+
+                    if (file.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
                     {
-                        using (ShellLink link = new ShellLink(file))
+                        try
                         {
-                            app.Path = CApp.MakeRelativePath(link.Target);
-                            app.GameName = Path.GetFileNameWithoutExtension(app.Path);
-                            app.StartIn = CApp.MakeRelativePath(link.WorkingDirectory);
-                            app.CommandLine = link.Arguments;
+                            using (ShellLink link = new ShellLink(file))
+                            {
+                                app.Path = CApp.MakeRelativePath(link.Target);
+                                app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                                app.StartIn = CApp.MakeRelativePath(link.WorkingDirectory);
+                                app.CommandLine = link.Arguments;
+                            }
                         }
+                        catch
+                        { }
                     }
-                    catch
-                    { }
-                }
+                    else if (!file.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        app.Path = CApp.MakeRelativePath(file);
+                        app.GameName = Path.GetFileNameWithoutExtension(app.Path);
+                        app.StartIn = CApp.MakeRelativePath(Path.GetDirectoryName(app.Path));
+                    }
 
-                if (File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "bin\\launcher.dll")) ||
-                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hl.exe")) ||
-                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hlds.exe")) ||
-                    File.Exists(Path.Combine(CApp.GetAbsolutePath(app.StartIn), "hltv.exe")))
-                {
-                    app.CommandLine = "-steam";
-                }
+                    var absPath = CApp.GetAbsolutePath(app.StartIn);
 
-                AutoAppConfig(file, app);
-            }
+                    if (File.Exists(Path.Combine(absPath, "bin\\launcher.dll"))
+                    || File.Exists(Path.Combine(absPath, "hl.exe"))
+                    || File.Exists(Path.Combine(absPath, "hlds.exe"))
+                    || File.Exists(Path.Combine(absPath, "hltv.exe")))
+                    {
+                        app.CommandLine = "-steam";
+                    }
+
+                    // Run the rest on main thread to stop C# from complaining about GUI updates from other thread
+                    this.Invoke(new Action(() =>
+                    {
+                        AutoAppConfig(file, app);
+                    }));
+                }
+            });
         }
 
         private void lstApps_OnItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
