@@ -158,11 +158,11 @@ namespace SSELauncher
             }
         }
 
-        void lstApps_DragDrop(object sender, DragEventArgs e)
+        async void lstApps_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
-            Task.Factory.StartNew(() =>
+            await Task.Run(() =>
             {
                 foreach (string file in files)
                 {
